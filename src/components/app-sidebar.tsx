@@ -4,7 +4,7 @@ import { IconFile, IconSettings, IconWorld } from "@tabler/icons-react";
 import Image from "next/image";
 import * as React from "react";
 
-import { NavDocuments } from "@/components/nav-documents";
+import { NavCases } from "@/components/nav-cases";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -40,13 +40,6 @@ const sidebarData = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  // Transform cases data to the format expected by NavDocuments
-  const cases = casesData.map((caseItem) => ({
-    name: caseItem.title,
-    url: caseItem.id,
-    icon: IconFile,
-  }));
-
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -83,7 +76,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavDocuments items={cases} />
+        <NavCases cases={casesData} />
         <NavSecondary items={sidebarData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

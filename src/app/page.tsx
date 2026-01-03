@@ -1,37 +1,30 @@
-import { AppSidebar } from "@/components/app-sidebar";
-import { ChartAreaInteractive } from "@/components/chart-area-interactive";
-import { DataTable } from "@/components/data-table";
-import { SectionCards } from "@/components/section-cards";
-import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-
-import data from "@/data/documents-data.json";
+import Link from "next/link";
 
 export default function Page() {
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar variant="inset" />
-      <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
-              </div>
-              <DataTable data={data} />
-            </div>
-          </div>
+    <main className="flex min-h-screen items-center justify-center bg-background px-6 py-12">
+      <div className="max-w-lg space-y-6 text-center">
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Welcome to Document RAG
+        </h1>
+        <p className="text-muted-foreground">
+          Log in to access your dashboard, explore cases, and search documents.
+        </p>
+        <div className="flex items-center justify-center gap-3">
+          <Link
+            href="/dashboard"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-4 py-2 text-sm font-medium"
+          >
+            Go to dashboard
+          </Link>
+          <Link
+            href="/login"
+            className="border-border hover:bg-muted rounded-md border px-4 py-2 text-sm font-medium"
+          >
+            Login
+          </Link>
         </div>
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </main>
   );
 }

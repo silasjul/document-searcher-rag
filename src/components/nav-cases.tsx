@@ -2,15 +2,19 @@
 
 import { useState } from "react";
 
+import Link from "next/link";
+
+import { useCase } from "@/contexts/case-context";
+
 import {
   IconChevronDown,
   IconChevronUp,
   IconDots,
+  IconFile,
   IconFolder,
   IconSearch,
   IconShare3,
   IconTrash,
-  type Icon,
 } from "@tabler/icons-react";
 
 import {
@@ -31,22 +35,22 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function NavDocuments({
-  items,
+export function NavCases({
+  cases,
 }: {
-  items: {
-    name: string;
-    url: number | string;
-    icon: Icon;
+  cases: {
+    title: string;
+    id: number;
   }[];
 }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const { caseData } = useCase();
   const { isMobile } = useSidebar();
   const normalizedSearch = searchTerm.toLowerCase().trim();
   const filteredItems = normalizedSearch
-    ? items.filter((item) => item.name.toLowerCase().includes(normalizedSearch))
-    : items;
+    ? cases.filter((c) => c.title.toLowerCase().includes(normalizedSearch))
+    : cases;
   const visibleItems = isExpanded ? filteredItems : filteredItems.slice(0, 5);
   const canToggle = filteredItems.length > 5;
 
@@ -73,13 +77,13 @@ export function NavDocuments({
             </SidebarMenuButton>
           </SidebarMenuItem>
         ) : (
-          visibleItems.map((item) => (
-            <SidebarMenuItem key={item.name}>
-              <SidebarMenuButton asChild>
-                <a href={`/case/${item.url}`}>
-                  <item.icon />
-                  <span>{item.name}</span>
-                </a>
+          visibleItems.map((c) => (
+            <SidebarMenuItem key={c.id}>
+              <SidebarMenuButton asChild isActive={caseData?.id === c.id}>
+                <Link href={`/dashboard/case/${c.id}`}>
+                  <IconFile />
+                  <span>{c.title}</span>
+                </Link>
               </SidebarMenuButton>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

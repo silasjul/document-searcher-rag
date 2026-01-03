@@ -18,7 +18,7 @@ export function NavMain() {
   const handleNewCase = () => {
     // Generate a new case ID (in production, this would be done on the backend)
     const newCaseId = Date.now();
-    router.push(`/case/${newCaseId}`);
+    router.push(`/dashboard/case/${newCaseId}`);
   };
 
   return (
@@ -27,7 +27,7 @@ export function NavMain() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Home">
-              <Link href="/">
+              <Link href="/dashboard">
                 <IconHome />
                 <span>Home</span>
               </Link>

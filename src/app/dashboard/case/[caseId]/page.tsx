@@ -1,5 +1,4 @@
 import { ChatInterface } from "@/components/chat-interface";
-import casesData from "@/data/cases-data.json";
 import NotFound from "./not-found";
 
 interface CasePageProps {
@@ -21,20 +20,11 @@ export default async function DashboardCasePage({
   ]);
 
   const caseId = Number(resolvedParams?.caseId);
-  const chatId =
-    typeof resolvedSearchParams?.chatId === "string"
-      ? resolvedSearchParams?.chatId
-      : undefined;
+  const chatId = Number(resolvedSearchParams?.chatId);
 
   if (!Number.isFinite(caseId)) {
     return <NotFound />;
   }
 
-  const caseData = casesData.find((c) => c.id === caseId);
-
-  if (!caseData) {
-    return <NotFound />;
-  }
-
-  return <ChatInterface initialCaseData={caseData} initialChatId={chatId} />;
+  return <ChatInterface caseId={caseId} chatId={chatId} />;
 }

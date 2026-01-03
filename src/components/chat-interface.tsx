@@ -4,30 +4,25 @@ import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CaseData, useCase } from "@/contexts/case-context";
+import { useCase } from "@/contexts/case-context";
 import { IconFile, IconPaperclip, IconSend } from "@tabler/icons-react";
 
 interface ChatInterfaceProps {
-  initialCaseData?: CaseData;
-  initialChatId?: string;
+  caseId?: number;
+  chatId?: number;
 }
 
-export function ChatInterface({
-  initialCaseData,
-  initialChatId,
-}: ChatInterfaceProps) {
-  const { caseData: contextCaseData, setCaseData, setChatId } = useCase();
+export function ChatInterface({ caseId, chatId }: ChatInterfaceProps) {
+  const { caseData, setCaseId, setChatId } = useCase();
 
   useEffect(() => {
-    if (initialCaseData) {
-      setCaseData(initialCaseData);
+    if (caseId) {
+      setCaseId(caseId);
     }
-    if (initialChatId) {
-      setChatId(initialChatId);
+    if (chatId) {
+      setChatId(chatId.toString());
     }
-  }, [initialCaseData, initialChatId, setCaseData, setChatId]);
-
-  const caseData = initialCaseData || contextCaseData;
+  }, [caseId, chatId, setCaseId, setChatId]);
 
   if (!caseData) {
     return <div>Case not found</div>;

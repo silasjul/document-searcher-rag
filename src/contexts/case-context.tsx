@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useMemo, useState } from "react";
+import casesData from "@/data/cases-data.json";
 
 export interface CaseData {
   id: number;
@@ -8,10 +9,11 @@ export interface CaseData {
 }
 
 interface CaseContextValue {
+  caseId: number | undefined;
+  setCaseId: (caseId: number) => void;
   caseData: CaseData | null;
   chatId?: string;
   setChatId: (chatId?: string) => void;
-  setCaseData: (caseData: CaseData | null) => void;
 }
 
 const CaseContext = createContext<CaseContextValue | undefined>(undefined);
@@ -21,17 +23,23 @@ interface CaseProviderProps {
 }
 
 export function CaseProvider({ children }: CaseProviderProps) {
-  const [caseData, setCaseData] = useState<CaseData | null>(null);
+  const [caseId, setCaseId] = useState<number | undefined>(undefined);
   const [chatId, setChatId] = useState<string | undefined>(undefined);
+
+  const caseData = useMemo(() => {
+    if (!caseId) return null;
+    return casesData.find((c) => c.id === caseId) || null;
+  }, [caseId]);
 
   const value = useMemo(
     () => ({
       caseData,
+      caseId,
       chatId,
+      setCaseId,
       setChatId,
-      setCaseData,
     }),
-    [caseData, chatId]
+    [caseData, caseId, chatId]
   );
 
   return <CaseContext.Provider value={value}>{children}</CaseContext.Provider>;

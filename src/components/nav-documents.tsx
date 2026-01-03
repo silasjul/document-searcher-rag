@@ -36,7 +36,7 @@ export function NavDocuments({
 }: {
   items: {
     name: string;
-    url: string;
+    url: number | string;
     icon: Icon;
   }[];
 }) {
@@ -76,7 +76,7 @@ export function NavDocuments({
           visibleItems.map((item) => (
             <SidebarMenuItem key={item.name}>
               <SidebarMenuButton asChild>
-                <a href={item.url}>
+                <a href={`/case/${item.url}`}>
                   <item.icon />
                   <span>{item.name}</span>
                 </a>

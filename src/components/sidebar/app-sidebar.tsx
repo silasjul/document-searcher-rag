@@ -17,7 +17,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Case } from "@/lib/mock-data";
 
 const sidebarData = {
   user: {
@@ -39,10 +38,7 @@ const sidebarData = {
   ],
 };
 
-export function AppSidebar({
-  cases,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & { cases: Case[] }) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -79,7 +75,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavCases cases={cases} />
+        <NavCases />
         <NavSecondary items={sidebarData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

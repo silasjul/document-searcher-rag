@@ -3,16 +3,12 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
-import { Case } from "@/lib/mock-data";
-import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { updateCaseName } from "@/utils/cases/cases-actions";
 
-interface SiteHeaderProps {
-  cases?: Case[];
-}
+import { CaseNameInput } from "@/components/case-name-input";
+import { useCases } from "@/components/cases-provider";
 
-export function SiteHeader({ cases = [] }: SiteHeaderProps) {
+export function SiteHeader() {
+  const { cases, updateCaseNameOptimistic } = useCases();
   const params = useParams();
   const caseId = params?.caseId as string | undefined;
   const activeCase = cases.find((c) => c.id === caseId);
@@ -30,44 +26,16 @@ export function SiteHeader({ cases = [] }: SiteHeaderProps) {
             key={activeCase.id}
             caseId={activeCase.id}
             initialName={activeCase.name}
+            className="w-50 sm:w-75"
+            autoFocus={false}
+            onRename={(newName) =>
+              updateCaseNameOptimistic(activeCase.id, newName)
+            }
           />
         ) : (
-          <h1 className="text-base font-medium">Home</h1>
+          <h1 className="text-base font-medium px-2">Home</h1>
         )}
       </div>
     </header>
-  );
-}
-
-function CaseNameInput({
-  caseId,
-  initialName,
-}: {
-  caseId: string;
-  initialName: string;
-}) {
-  const [value, setValue] = useState(initialName);
-
-  async function handleSave() {
-    if (!value || value === initialName) {
-      setValue(initialName);
-      return;
-    }
-    await updateCaseName(caseId, value);
-  }
-
-  return (
-    <Input
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      onBlur={handleSave}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") {
-          e.currentTarget.blur();
-        }
-      }}
-      className="h-8 w-75 border-none shadow-none focus-visible:ring-black focus-visible:ring-1 bg-transparent px-2 text-base font-medium hover:ring-black/20 hover:ring-1 transition-all duration-100 ease-linear"
-      placeholder="Untitled Case"
-    />
   );
 }

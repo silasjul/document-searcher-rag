@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/sidebar/site-header";
 import { getCases } from "@/utils/cases/get-cases-data";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
+import { CasesProvider } from "@/components/cases-provider";
 
 export default async function DashboardLayout({
   children,
@@ -21,11 +22,13 @@ export default async function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" cases={cases} />
-      <SidebarInset>
-        <SiteHeader cases={cases} />
-        <div className="flex flex-1 flex-col">{children}</div>
-      </SidebarInset>
+      <CasesProvider cases={cases}>
+        <AppSidebar variant="inset" />
+        <SidebarInset>
+          <SiteHeader />
+          <div className="flex flex-1 flex-col">{children}</div>
+        </SidebarInset>
+      </CasesProvider>
     </SidebarProvider>
   );
 }

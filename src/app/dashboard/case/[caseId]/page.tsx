@@ -1,30 +1,26 @@
-import { ChatInterface } from "@/components/chat-interface";
 import NotFound from "./not-found";
+import { getCase } from "@/utils/cases/get-case-data";
 
 interface CasePageProps {
   params: Promise<{
     caseId: string;
   }>;
-  searchParams: Promise<{
-    chatId?: string;
-  }>;
 }
 
 export default async function DashboardCasePage({
   params,
-  searchParams,
 }: CasePageProps) {
-  const [resolvedParams, resolvedSearchParams] = await Promise.all([
+  const [resolvedParams] = await Promise.all([
     params,
-    searchParams,
   ]);
 
-  const caseId = Number(resolvedParams?.caseId);
-  const chatId = Number(resolvedSearchParams?.chatId);
+  const caseId = resolvedParams?.caseId as string;
 
-  if (!Number.isFinite(caseId)) {
+  const caseData = await getCase(caseId);
+
+  if (!caseData) {
     return <NotFound />;
   }
 
-  return <ChatInterface caseId={caseId} chatId={chatId} />;
+  return <div className="@container/main flex flex-1 flex-col"></div>;
 }

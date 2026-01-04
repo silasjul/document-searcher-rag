@@ -4,8 +4,6 @@ import { useState } from "react";
 
 import Link from "next/link";
 
-import { useCase } from "@/contexts/case-context";
-
 import {
   IconChevronDown,
   IconChevronUp,
@@ -34,25 +32,22 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import type { Case } from "@/lib/mock-data";
+import { useParams } from "next/navigation";
 
-export function NavCases({
-  cases,
-}: {
-  cases: {
-    title: string;
-    id: number;
-  }[];
-}) {
+export function NavCases({ cases }: { cases: Case[] }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const { caseData } = useCase();
   const { isMobile } = useSidebar();
   const normalizedSearch = searchTerm.toLowerCase().trim();
   const filteredItems = normalizedSearch
-    ? cases.filter((c) => c.title.toLowerCase().includes(normalizedSearch))
+    ? cases.filter((c) => c.name.toLowerCase().includes(normalizedSearch))
     : cases;
   const visibleItems = isExpanded ? filteredItems : filteredItems.slice(0, 5);
   const canToggle = filteredItems.length > 5;
+
+  const params = useParams();
+  const activeCaseId = params.caseId as string;
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -79,10 +74,10 @@ export function NavCases({
         ) : (
           visibleItems.map((c) => (
             <SidebarMenuItem key={c.id}>
-              <SidebarMenuButton asChild isActive={caseData?.id === c.id}>
+              <SidebarMenuButton asChild isActive={activeCaseId === c.id}>
                 <Link href={`/dashboard/case/${c.id}`}>
                   <IconFile />
-                  <span>{c.title}</span>
+                  <span>{c.name}</span>
                 </Link>
               </SidebarMenuButton>
               <DropdownMenu>

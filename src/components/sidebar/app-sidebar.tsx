@@ -1,13 +1,13 @@
 "use client";
 
-import { IconFile, IconSettings, IconWorld } from "@tabler/icons-react";
+import { IconSettings, IconWorld } from "@tabler/icons-react";
 import Image from "next/image";
 import * as React from "react";
 
-import { NavCases } from "@/components/nav-cases";
-import { NavMain } from "@/components/nav-main";
-import { NavSecondary } from "@/components/nav-secondary";
-import { NavUser } from "@/components/nav-user";
+import { NavCases } from "@/components/sidebar/nav-cases";
+import { NavMain } from "@/components/sidebar/nav-main";
+import { NavSecondary } from "@/components/sidebar/nav-secondary";
+import { NavUser } from "@/components/sidebar/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import casesData from "@/data/cases-data.json";
+import { Case } from "@/lib/mock-data";
 
 const sidebarData = {
   user: {
@@ -39,7 +39,10 @@ const sidebarData = {
   ],
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  cases,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { cases: Case[] }) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -76,7 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavCases cases={casesData} />
+        <NavCases cases={cases} />
         <NavSecondary items={sidebarData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

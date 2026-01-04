@@ -23,7 +23,7 @@ export default async function DashboardLayout({
     >
       <AppSidebar variant="inset" cases={cases} />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader cases={cases} />
         <div className="flex flex-1 flex-col">{children}</div>
       </SidebarInset>
     </SidebarProvider>

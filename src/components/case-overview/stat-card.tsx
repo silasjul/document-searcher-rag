@@ -19,14 +19,11 @@ export function StatCard({
   return (
     <motion.div
       onClick={onClick}
-      className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-6 transition-colors hover:border-border ${
-        onClick ? "cursor-pointer hover:bg-accent/5" : ""
+      className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-all ${
+        onClick ? "cursor-pointer hover:border-border hover:bg-card/80" : ""
       }`}
     >
-      {/* Subtle gradient accent */}
-      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-muted opacity-50 blur-2xl transition-opacity group-hover:opacity-70" />
-
-      <div className="relative flex items-start justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
           <p className="mt-2 text-3xl font-bold tracking-tight text-foreground">
@@ -39,7 +36,7 @@ export function StatCard({
             </div>
           )}
         </div>
-        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted/80 text-muted-foreground transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
           <Icon className="h-6 w-6" strokeWidth={1.5} />
         </div>
       </div>

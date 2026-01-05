@@ -27,6 +27,7 @@ import { formatFileSize } from "@/lib/utils";
 import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
 import { EmptyState } from "@/components/documents/empty-state";
+import { BackgroundGradients } from "@/components/background-gradients";
 
 export default function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -90,12 +91,7 @@ export default function DocumentsPage() {
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
-      {/* Background gradients */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-linear-to-br from-primary/5 to-violet-500/5 blur-3xl" />
-        <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-linear-to-br from-violet-500/5 to-primary/5 blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-linear-to-br from-primary/5 to-muted/20 blur-3xl" />
-      </div>
+      <BackgroundGradients />
 
       <div className="relative flex-1 overflow-auto">
         <div className="mx-auto max-w-6xl px-6 py-12 md:px-8 md:py-16">

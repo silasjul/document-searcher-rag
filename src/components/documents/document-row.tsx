@@ -81,7 +81,7 @@ export function DocumentRow({ document }: { document: Document }) {
               <IconDots className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40">
+          <DropdownMenuContent align="end">
             <DropdownMenuItem>
               <IconDownload className="mr-2 h-4 w-4" />
               Download
@@ -92,7 +92,7 @@ export function DocumentRow({ document }: { document: Document }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive focus:text-destructive">
-              <IconTrash className="mr-2 h-4 w-4" />
+              <IconTrash className="mr-2 h-4 w-4 text-destructive" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -30,11 +30,8 @@ export function ConversationCard({
             duration: 0.2,
             ease: "easeOut",
           }}
-          className="relative overflow-hidden rounded-2xl border border-border/50 bg-linear-to-br from-card to-card/80 p-6 transition-colors hover:border-primary/30"
+          className="relative overflow-hidden rounded-2xl border border-border/50 bg-card/50 p-6 backdrop-blur-sm transition-colors hover:border-primary/30 hover:bg-card/80"
         >
-          {/* Decorative gradient orb */}
-          <div className="absolute -right-16 -top-16 h-32 w-32 rounded-full bg-linear-to-br from-primary/20 to-violet-500/20 blur-3xl transition-all group-hover:opacity-70" />
-
           {/* Chat index badge */}
           <div className="absolute right-4 top-4">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted/50 text-xs font-medium text-muted-foreground">

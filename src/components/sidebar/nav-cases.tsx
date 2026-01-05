@@ -58,7 +58,7 @@ export function NavCases() {
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Cases</SidebarGroupLabel>
-      <div className="px-2 pb-2">
+      <div className="pb-2">
         <div className="relative">
           <IconSearch className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input

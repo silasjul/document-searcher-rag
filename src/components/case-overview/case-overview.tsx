@@ -18,6 +18,7 @@ import { StatCard } from "./stat-card";
 import { DocumentCard } from "./document-card";
 import { ConversationCard } from "./conversation-card";
 import { EmptyState } from "./empty-state";
+import { BackgroundGradients } from "@/components/background-gradients";
 
 interface CaseOverviewProps {
   caseData: Case;
@@ -52,12 +53,7 @@ export function CaseOverview({
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
-      {/* Background gradients */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-40 -top-40 h-80 w-80 rounded-full bg-linear-to-br from-primary/5 to-violet-500/5 blur-3xl" />
-        <div className="absolute -right-40 top-1/3 h-80 w-80 rounded-full bg-linear-to-br from-violet-500/5 to-primary/5 blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-linear-to-br from-primary/5 to-muted/20 blur-3xl" />
-      </div>
+      <BackgroundGradients />
 
       <div className="relative flex-1 overflow-auto">
         <div className="mx-auto max-w-6xl px-6 py-12 md:px-8 md:py-16">
@@ -72,34 +68,30 @@ export function CaseOverview({
                     variant="secondary"
                     className="mb-4 gap-1.5 bg-primary/10 text-primary"
                   >
-                      <IconBolt className="h-3 w-3" />
-                      Active Case
-                    </Badge>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                      Case Overview
-                    </h1>
-                    <p className="mt-2 text-muted-foreground">
-                      {chats.length} conversation{chats.length !== 1 ? "s" : ""}{" "}
-                      • {documents.length} document
-                      {documents.length !== 1 ? "s" : ""}
-                      {latestChat && (
-                        <>
-                          {" "}
-                          • Last active{" "}
-                          {formatDistanceToNow(new Date(latestChat.updatedAt), {
-                            addSuffix: true,
-                          })}
-                        </>
-                      )}
-                    </p>
-                  </div>
+                    <IconBolt className="h-3 w-3" />
+                    Active Case
+                  </Badge>
+                  <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                    Case Overview
+                  </h1>
+                  <p className="mt-2 text-muted-foreground">
+                    {chats.length} conversation{chats.length !== 1 ? "s" : ""} •{" "}
+                    {documents.length} document
+                    {documents.length !== 1 ? "s" : ""}
+                    {latestChat && (
+                      <>
+                        {" "}
+                        • Last active{" "}
+                        {formatDistanceToNow(new Date(latestChat.updatedAt), {
+                          addSuffix: true,
+                        })}
+                      </>
+                    )}
+                  </p>
+                </div>
 
-                  <Button
-                    size="lg"
-                    className="group gap-2 font-semibold"
-                    asChild
-                  >
-                    <Link href={`/dashboard/case/${caseData.id}?chatid=new`}>
+                <Button size="lg" className="group gap-2 font-semibold" asChild>
+                  <Link href={`/dashboard/case/${caseData.id}?chatid=new`}>
                     <IconPlus className="h-5 w-5 transition-transform group-hover:rotate-90" />
                     New conversation
                   </Link>
@@ -108,24 +100,24 @@ export function CaseOverview({
 
               {/* Stats Grid */}
               <div className="grid gap-4 sm:grid-cols-2">
-                  <StatCard
-                    icon={IconMessage}
-                    label="Total Conversations"
-                    value={chats.length}
-                    onClick={() => scrollToSection("conversations")}
-                  />
-                  <StatCard
-                    icon={IconFileText}
-                    label="Documents"
-                    value={`${readyDocuments}/${documents.length}`}
-                    trend={
-                      documents.length - readyDocuments > 0
-                        ? `${documents.length - readyDocuments} processing`
-                        : undefined
-                    }
-                    onClick={() => scrollToSection("documents")}
-                  />
-                </div>
+                <StatCard
+                  icon={IconMessage}
+                  label="Total Conversations"
+                  value={chats.length}
+                  onClick={() => scrollToSection("conversations")}
+                />
+                <StatCard
+                  icon={IconFileText}
+                  label="Documents"
+                  value={`${readyDocuments}/${documents.length}`}
+                  trend={
+                    documents.length - readyDocuments > 0
+                      ? `${documents.length - readyDocuments} processing`
+                      : undefined
+                  }
+                  onClick={() => scrollToSection("documents")}
+                />
+              </div>
 
               {/* Conversations Grid */}
               {chats.length > 0 && (
@@ -173,10 +165,7 @@ export function CaseOverview({
                 {documents.length === 0 ? (
                   <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/50 bg-muted/20 py-12 text-center">
                     <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-muted/50 text-muted-foreground">
-                      <IconFileTypePdf
-                        className="h-7 w-7"
-                        strokeWidth={1.5}
-                      />
+                      <IconFileTypePdf className="h-7 w-7" strokeWidth={1.5} />
                     </div>
                     <h3 className="font-medium text-foreground">
                       No documents yet
@@ -215,11 +204,7 @@ export function CaseOverview({
                       contracts&quot;.
                     </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="gap-2 shrink-0"
-                    asChild
-                  >
+                  <Button variant="outline" className="gap-2 shrink-0" asChild>
                     <Link href={`/dashboard/case/${caseData.id}?chatid=new`}>
                       <IconMessage className="h-4 w-4" />
                       Ask AI

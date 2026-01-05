@@ -1,6 +1,5 @@
 "use client";
 
-import { IconSettings, IconWorld } from "@tabler/icons-react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -24,13 +23,6 @@ const sidebarData = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -71,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain />
         <NavCases />
-        <NavSecondary items={sidebarData.navSecondary} className="mt-auto" />
+        <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={sidebarData.user} />

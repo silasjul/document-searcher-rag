@@ -59,7 +59,7 @@ export function CaseNameInput({
         }
       }}
       className={cn(
-        "h-8 border-none shadow-none focus-visible:ring-black focus-visible:ring-1 bg-transparent px-2 text-base font-medium hover:ring-black/20 hover:ring-1 transition-all duration-100 ease-linear",
+        "h-8 border-none shadow-none focus-visible:ring-1 focus-visible:bg-muted/50 dark:focus-visible:bg-input bg-transparent dark:bg-transparent px-2 text-base font-medium hover:bg-transparent dark:hover:bg-transparent hover:ring-foreground/10 hover:ring-1 transition-all duration-100 ease-linear",
         className
       )}
       placeholder="Untitled Case"

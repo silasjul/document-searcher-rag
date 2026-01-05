@@ -23,11 +23,11 @@ export function ConversationCard({
       >
         <motion.div
           whileHover={{
-            scale: 1.02,
+            scale: 1.015,
             boxShadow: "0 20px 40px -12px rgba(99, 102, 241, 0.15)",
           }}
           transition={{
-            duration: 0.3,
+            duration: 0.2,
             ease: "easeOut",
           }}
           className="relative overflow-hidden rounded-2xl border border-border/50 bg-linear-to-br from-card to-card/80 p-6 transition-colors hover:border-primary/30"

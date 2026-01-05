@@ -2,7 +2,7 @@
 
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 import { CaseNameInput } from "@/components/case-name-input";
 import { useCases } from "@/components/cases-provider";
@@ -10,6 +10,7 @@ import { useCases } from "@/components/cases-provider";
 export function SiteHeader() {
   const { cases, updateCaseNameOptimistic } = useCases();
   const params = useParams();
+  const pathname = usePathname();
   const caseId = params?.caseId as string | undefined;
   const activeCase = cases.find((c) => c.id === caseId);
 
@@ -33,7 +34,9 @@ export function SiteHeader() {
             }
           />
         ) : (
-          <h1 className="text-base font-medium px-2">Home</h1>
+          <h1 className="text-base font-medium px-2">
+            {pathname === "/dashboard/documents" ? "Documents" : "Home"}
+          </h1>
         )}
       </div>
     </header>

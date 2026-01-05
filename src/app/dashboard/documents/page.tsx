@@ -132,22 +132,30 @@ export default function DocumentsPage() {
                 label="Total Documents"
                 value={MOCK_DOCUMENTS.length}
                 subtext={formatFileSize(stats.totalSize)}
+                onClick={() => setStatusFilter("all")}
+                isActive={statusFilter === "all"}
               />
               <StatCard
                 icon={IconCheck}
                 label="Ready"
                 value={stats.ready}
                 subtext={`${stats.totalPages} total pages`}
+                onClick={() => setStatusFilter("ready")}
+                isActive={statusFilter === "ready"}
               />
               <StatCard
                 icon={IconClock}
                 label="Processing"
                 value={stats.processing}
+                onClick={() => setStatusFilter("processing")}
+                isActive={statusFilter === "processing"}
               />
               <StatCard
                 icon={IconAlertTriangle}
                 label="Errors"
                 value={stats.error}
+                onClick={() => setStatusFilter("error")}
+                isActive={statusFilter === "error"}
               />
             </div>
             <div className="space-y-5">
@@ -166,10 +174,10 @@ export default function DocumentsPage() {
                 <div className="flex items-center gap-2">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
                     <SelectTrigger className="w-35">
-                      <IconFilter className="mr-2 h-4 w-4" />
+                      <IconFilter className="h-4 w-4" />
                       <SelectValue placeholder="Status" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="all">All status</SelectItem>
                       <SelectItem value="ready">Ready</SelectItem>
                       <SelectItem value="processing">Processing</SelectItem>
@@ -179,10 +187,10 @@ export default function DocumentsPage() {
 
                   <Select value={sortBy} onValueChange={setSortBy}>
                     <SelectTrigger className="w-35">
-                      <IconSortDescending className="mr-2 h-4 w-4" />
-                      <SelectValue placeholder="Sort by" />
+                      <IconSortDescending className="h-4 w-4" />
+                      <SelectValue placeholder="Sort by"></SelectValue>
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper">
                       <SelectItem value="newest">Newest first</SelectItem>
                       <SelectItem value="oldest">Oldest first</SelectItem>
                       <SelectItem value="name">Name</SelectItem>

@@ -21,6 +21,16 @@ export type Message = {
   createdAt: string;
 };
 
+export type Document = {
+  id: string;
+  caseId: string;
+  name: string;
+  fileSize: number; // in bytes
+  pageCount: number;
+  uploadedAt: string;
+  status: "processing" | "ready" | "error";
+};
+
 // --- 2. THE DATA (Your Sandbox) ---
 
 export const MOCK_CASES: Case[] = [
@@ -76,7 +86,8 @@ export const MOCK_MESSAGES: Message[] = [
     id: "msg-2",
     chatId: "chat-1-a",
     role: "assistant",
-    content: "According to **Clause 14.2**, the tenant must provide **6 months written notice**. \n\nHowever, this option is only available after the initial lock-in period of 24 months expires.",
+    content:
+      "According to **Clause 14.2**, the tenant must provide **6 months written notice**. \n\nHowever, this option is only available after the initial lock-in period of 24 months expires.",
     createdAt: "2024-03-10T14:00:05Z",
   },
   {
@@ -90,7 +101,8 @@ export const MOCK_MESSAGES: Message[] = [
     id: "msg-4",
     chatId: "chat-1-a",
     role: "assistant",
-    content: "Yes, under **Clause 18 (Relocation)**. The landlord can relocate the tenant to 'substantially similar premises' within the same industrial park upon 90 days notice, provided they cover all moving costs.",
+    content:
+      "Yes, under **Clause 18 (Relocation)**. The landlord can relocate the tenant to 'substantially similar premises' within the same industrial park upon 90 days notice, provided they cover all moving costs.",
     createdAt: "2024-03-10T14:02:10Z",
   },
 
@@ -106,7 +118,76 @@ export const MOCK_MESSAGES: Message[] = [
     id: "msg-6",
     chatId: "chat-1-b",
     role: "assistant",
-    content: "No. The base rent is subject to annual indexation based on the **Net Price Index (NPI)**, capped at 4% per annum.",
+    content:
+      "No. The base rent is subject to annual indexation based on the **Net Price Index (NPI)**, capped at 4% per annum.",
     createdAt: "2024-03-09T09:30:05Z",
+  },
+];
+
+export const MOCK_DOCUMENTS: Document[] = [
+  // Documents for Case 1 (Lease)
+  {
+    id: "doc-1-a",
+    caseId: "case-1",
+    name: "Warehouse_Lease_Agreement_2024.pdf",
+    fileSize: 2457600, // ~2.4 MB
+    pageCount: 45,
+    uploadedAt: "2024-03-01T10:00:00Z",
+    status: "ready",
+  },
+  {
+    id: "doc-1-b",
+    caseId: "case-1",
+    name: "Addendum_Rent_Escalation.pdf",
+    fileSize: 524288, // ~512 KB
+    pageCount: 8,
+    uploadedAt: "2024-03-02T14:30:00Z",
+    status: "ready",
+  },
+  {
+    id: "doc-1-c",
+    caseId: "case-1",
+    name: "Floor_Plans_Harbor_Unit_7B.pdf",
+    fileSize: 8912896, // ~8.5 MB
+    pageCount: 12,
+    uploadedAt: "2024-03-03T09:15:00Z",
+    status: "ready",
+  },
+  {
+    id: "doc-1-d",
+    caseId: "case-1",
+    name: "Environmental_Compliance_Report.pdf",
+    fileSize: 1048576, // ~1 MB
+    pageCount: 24,
+    uploadedAt: "2024-03-05T16:45:00Z",
+    status: "processing",
+  },
+  // Documents for Case 2 (Merger)
+  {
+    id: "doc-2-a",
+    caseId: "case-2",
+    name: "Acquisition_Term_Sheet.pdf",
+    fileSize: 1572864, // ~1.5 MB
+    pageCount: 18,
+    uploadedAt: "2024-02-28T11:00:00Z",
+    status: "ready",
+  },
+  {
+    id: "doc-2-b",
+    caseId: "case-2",
+    name: "Due_Diligence_Report_Q1.pdf",
+    fileSize: 15728640, // ~15 MB
+    pageCount: 156,
+    uploadedAt: "2024-03-01T08:00:00Z",
+    status: "ready",
+  },
+  {
+    id: "doc-2-c",
+    caseId: "case-2",
+    name: "IP_Portfolio_Summary.pdf",
+    fileSize: 3145728, // ~3 MB
+    pageCount: 42,
+    uploadedAt: "2024-03-04T13:20:00Z",
+    status: "ready",
   },
 ];

@@ -1,5 +1,9 @@
 import NotFound from "./not-found";
 import { getCase } from "@/utils/cases/get-case-data";
+import { getChatsForCase } from "@/utils/chat/get-chats";
+import { getDocumentsForCase } from "@/utils/documents/get-documents";
+import { Chat } from "@/components/chat";
+import { CaseOverview } from "@/components/case-overview";
 
 interface CasePageProps {
   params: Promise<{
@@ -22,21 +26,27 @@ export default async function DashboardCasePage({
   const caseId = resolvedParams?.caseId as string;
   const chatId = resolvedSearchParams?.chatid as string;
 
-  const caseData = await getCase(caseId);
+  const [caseData, chats, documents] = await Promise.all([
+    getCase(caseId),
+    getChatsForCase(caseId),
+    getDocumentsForCase(caseId),
+  ]);
 
   if (!caseData) {
     return <NotFound />;
   }
 
+  if (!chatId) {
+    return (
+      <div className="@container/main flex flex-1 flex-col">
+        <CaseOverview caseData={caseData} chats={chats} documents={documents} />
+      </div>
+    );
+  }
+
   return (
     <div className="@container/main flex flex-1 flex-col">
-      {chatId && (
-        <div className="p-4 bg-muted rounded-lg mb-4">
-          <p className="text-sm text-muted-foreground">
-            Chat ID: <span className="font-mono">{chatId}</span>
-          </p>
-        </div>
-      )}
+      <Chat chatId={chatId} caseData={caseData} />
     </div>
   );
 }

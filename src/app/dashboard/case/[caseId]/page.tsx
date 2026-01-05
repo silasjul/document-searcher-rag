@@ -3,7 +3,7 @@ import { getCase } from "@/utils/cases/get-case-data";
 import { getChatsForCase } from "@/utils/chat/get-chats";
 import { getDocumentsForCase } from "@/utils/documents/get-documents";
 import { Chat } from "@/components/chat";
-import { CaseOverview } from "@/components/case-overview";
+import { CaseOverview } from "@/components/case-overview/case-overview";
 
 interface CasePageProps {
   params: Promise<{

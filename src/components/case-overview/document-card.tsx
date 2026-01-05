@@ -17,11 +17,20 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { formatFileSize } from "@/lib/utils";
 
-export function DocumentCard({ document }: { document: Document }) {
+export function DocumentCard({
+  document,
+  onClick,
+}: {
+  document: Document;
+  onClick?: () => void;
+}) {
   const uploadedDate = new Date(document.uploadedAt);
 
   return (
-    <div className="group flex items-center gap-4 rounded-xl border border-border/50 bg-card/30 p-4 backdrop-blur-sm transition-all hover:border-border hover:bg-card/60">
+    <div
+      className="group flex items-center gap-4 rounded-xl border border-border/50 bg-card/30 p-4 backdrop-blur-sm transition-all hover:border-border hover:bg-card/60 cursor-pointer"
+      onClick={onClick}
+    >
       {/* PDF Icon */}
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
         <IconFileTypePdf className="h-6 w-6" strokeWidth={1.5} />

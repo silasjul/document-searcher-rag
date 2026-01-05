@@ -1,4 +1,4 @@
-import {  
+import {
   IconFileTypePdf,
   IconDownload,
   IconDots,
@@ -19,12 +19,21 @@ import { cn, formatFileSize } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { getStatusConfig } from "./utils";
 
-export function DocumentRow({ document }: { document: Document }) {
+export function DocumentRow({
+  document,
+  onClick,
+}: {
+  document: Document;
+  onClick?: () => void;
+}) {
   const statusConfig = getStatusConfig(document.status);
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className="group flex items-center gap-4 rounded-xl border border-border/50 bg-card/30 p-4 backdrop-blur-sm transition-all hover:border-border hover:bg-card/60">
+    <div
+      className="group flex items-center gap-4 rounded-xl border border-border/50 bg-card/30 p-4 backdrop-blur-sm transition-all hover:border-border hover:bg-card/60 cursor-pointer"
+      onClick={onClick}
+    >
       {/* Icon */}
       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-500">
         <IconFileTypePdf className="h-6 w-6" />

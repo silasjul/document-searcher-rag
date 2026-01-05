@@ -24,9 +24,9 @@ export default async function DashboardLayout({
     >
       <CasesProvider cases={cases}>
         <AppSidebar variant="inset" />
-        <SidebarInset>
+        <SidebarInset className="max-h-svh overflow-hidden">
           <SiteHeader />
-          <div className="flex flex-1 flex-col">{children}</div>
+          <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
         </SidebarInset>
       </CasesProvider>
     </SidebarProvider>

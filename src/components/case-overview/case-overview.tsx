@@ -24,6 +24,7 @@ interface CaseOverviewProps {
   caseData: Case;
   chats: ChatSession[];
   documents: Document[];
+  onDocumentClick?: (documentId: string) => void;
 }
 
 // Main Component
@@ -31,6 +32,7 @@ export function CaseOverview({
   caseData,
   chats,
   documents,
+  onDocumentClick,
 }: CaseOverviewProps) {
   const sortedChats = [...chats].sort(
     (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
@@ -52,10 +54,10 @@ export function CaseOverview({
   };
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden">
+    <div className="relative flex flex-1 flex-col overflow-hidden h-full">
       <BackgroundGradients />
 
-      <div className="relative flex-1 overflow-auto">
+      <div className="relative h-full overflow-auto">
         <div className="mx-auto max-w-6xl px-6 py-12 md:px-8 md:py-16">
           {chats.length === 0 && documents.length === 0 ? (
             <EmptyState caseId={caseData.id} />
@@ -182,7 +184,11 @@ export function CaseOverview({
                 ) : (
                   <div className="space-y-2">
                     {sortedDocuments.map((doc) => (
-                      <DocumentCard key={doc.id} document={doc} />
+                      <DocumentCard
+                        key={doc.id}
+                        document={doc}
+                        onClick={() => onDocumentClick?.(doc.id)}
+                      />
                     ))}
                   </div>
                 )}

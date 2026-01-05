@@ -2,8 +2,7 @@ import NotFound from "./not-found";
 import { getCase } from "@/utils/cases/get-case-data";
 import { getChatsForCase } from "@/utils/chat/get-chats";
 import { getDocumentsForCase } from "@/utils/documents/get-documents";
-import { Chat } from "@/components/chat";
-import { CaseOverview } from "@/components/case-overview/case-overview";
+import { CasePageWrapper } from "@/components/case-page-wrapper";
 
 interface CasePageProps {
   params: Promise<{
@@ -36,17 +35,12 @@ export default async function DashboardCasePage({
     return <NotFound />;
   }
 
-  if (!chatId) {
-    return (
-      <div className="@container/main flex flex-1 flex-col">
-        <CaseOverview caseData={caseData} chats={chats} documents={documents} />
-      </div>
-    );
-  }
-
   return (
-    <div className="@container/main flex flex-1 flex-col">
-      <Chat chatId={chatId} caseData={caseData} />
-    </div>
+    <CasePageWrapper
+      caseData={caseData}
+      chats={chats}
+      documents={documents}
+      chatId={chatId}
+    />
   );
 }

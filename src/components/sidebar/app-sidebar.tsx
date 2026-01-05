@@ -26,11 +26,6 @@ const sidebarData = {
   },
   navSecondary: [
     {
-      title: "Global Documents",
-      url: "#",
-      icon: IconWorld,
-    },
-    {
       title: "Settings",
       url: "#",
       icon: IconSettings,

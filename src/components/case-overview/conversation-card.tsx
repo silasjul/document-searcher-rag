@@ -3,7 +3,6 @@ import { ChatSession } from "@/lib/mock-data";
 import { motion } from "framer-motion";
 import { IconMessage, IconClock, IconChevronRight } from "@tabler/icons-react";
 import { formatDistanceToNow, format } from "date-fns";
-import { cardHoverVariants } from "./variants";
 
 export function ConversationCard({
   chat,

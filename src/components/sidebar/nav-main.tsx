@@ -1,7 +1,8 @@
 "use client";
 
-import { IconCirclePlusFilled, IconHome } from "@tabler/icons-react";
+import { IconCirclePlusFilled, IconFiles, IconHome } from "@tabler/icons-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import {
   SidebarGroup,
@@ -12,15 +13,33 @@ import {
 } from "@/components/ui/sidebar";
 
 export function NavMain() {
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Home">
+            <SidebarMenuButton
+              asChild
+              tooltip="Home"
+              isActive={pathname === "/dashboard"}
+            >
               <Link href="/dashboard">
                 <IconHome />
                 <span>Home</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              tooltip="Documents"
+              isActive={pathname === "/dashboard/documents"}
+            >
+              <Link href="/dashboard/documents">
+                <IconFiles />
+                <span>Documents</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

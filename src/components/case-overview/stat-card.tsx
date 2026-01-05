@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { IconTrendingUp } from "@tabler/icons-react";
-import { itemVariants } from "./variants";
 
 interface StatCardProps {
   icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
@@ -19,7 +18,6 @@ export function StatCard({
 }: StatCardProps) {
   return (
     <motion.div
-      variants={itemVariants}
       onClick={onClick}
       className={`group relative overflow-hidden rounded-2xl border border-border/50 bg-card p-6 transition-colors hover:border-border ${
         onClick ? "cursor-pointer hover:bg-accent/5" : ""

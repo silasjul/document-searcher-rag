@@ -23,9 +23,14 @@ export function ConversationCard({
         className="group block"
       >
         <motion.div
-          variants={cardHoverVariants}
-          initial="visible"
-          whileHover="hover"
+          whileHover={{
+            scale: 1.02,
+            boxShadow: "0 20px 40px -12px rgba(99, 102, 241, 0.15)",
+          }}
+          transition={{
+            duration: 0.3,
+            ease: "easeOut",
+          }}
           className="relative overflow-hidden rounded-2xl border border-border/50 bg-linear-to-br from-card to-card/80 p-6 transition-colors hover:border-primary/30"
         >
           {/* Decorative gradient orb */}

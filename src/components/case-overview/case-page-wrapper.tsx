@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Case, ChatSession, Document } from "@/lib/mock-data";
 import { Chat } from "@/components/chat";
 import { CaseOverview } from "@/components/case-overview/case-overview";
-import { SplitViewLayout } from "@/components/split-view-layout";
+import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
 
 interface CasePageWrapperProps {
   caseData: Case;

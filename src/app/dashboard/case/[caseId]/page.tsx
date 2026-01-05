@@ -2,7 +2,7 @@ import NotFound from "./not-found";
 import { getCase } from "@/utils/cases/get-case-data";
 import { getChatsForCase } from "@/utils/chat/get-chats";
 import { getDocumentsForCase } from "@/utils/documents/get-documents";
-import { CasePageWrapper } from "@/components/case-page-wrapper";
+import { CasePageWrapper } from "@/components/case-overview/case-page-wrapper";
 
 interface CasePageProps {
   params: Promise<{

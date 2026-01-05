@@ -4,7 +4,7 @@ import { SiteHeader } from "@/components/sidebar/site-header";
 import { getCases } from "@/utils/cases/get-cases-data";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { CasesProvider } from "@/components/cases-provider";
+import { CasesProvider } from "@/components/case-overview/cases-provider";
 
 export default async function DashboardLayout({
   children,

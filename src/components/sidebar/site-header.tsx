@@ -4,8 +4,8 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useParams, usePathname } from "next/navigation";
 
-import { CaseNameInput } from "@/components/case-name-input";
-import { useCases } from "@/components/cases-provider";
+import { CaseNameInput } from "@/components/case-overview/case-name-input";
+import { useCases } from "@/components/case-overview/cases-provider";
 
 export function SiteHeader() {
   const { cases, updateCaseNameOptimistic } = useCases();

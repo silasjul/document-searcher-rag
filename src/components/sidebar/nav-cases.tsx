@@ -34,9 +34,9 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
-import { CaseNameInput } from "@/components/case-name-input";
+import { CaseNameInput } from "@/components/case-overview/case-name-input";
 import { cn } from "@/lib/utils";
-import { useCases } from "@/components/cases-provider";
+import { useCases } from "@/components/case-overview/cases-provider";
 
 export function NavCases() {
   const { cases, updateCaseNameOptimistic } = useCases();

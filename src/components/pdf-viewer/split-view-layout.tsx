@@ -7,7 +7,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { PdfViewer } from "./pdf-viewer";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { IconX } from "@tabler/icons-react";
 
 interface SplitViewLayoutProps {

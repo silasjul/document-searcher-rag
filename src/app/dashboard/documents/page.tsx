@@ -28,7 +28,7 @@ import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
 import { EmptyState } from "@/components/documents/empty-state";
 import { BackgroundGradients } from "@/components/background-gradients";
-import { SplitViewLayout } from "@/components/split-view-layout";
+import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
 
 export default function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");

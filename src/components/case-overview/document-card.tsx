@@ -1,12 +1,9 @@
 import { Document } from "@/lib/mock-data";
 import {
   IconFileTypePdf,
-  IconLoader2,
-  IconCheck,
   IconDotsVertical,
   IconDownload,
 } from "@tabler/icons-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import { formatFileSize } from "@/lib/utils";
+import { DocumentStatusBadge } from "@/components/documents/document-status-badge";
 
 export function DocumentCard({
   document,
@@ -42,24 +40,7 @@ export function DocumentCard({
           <h4 className="truncate font-medium text-foreground">
             {document.name}
           </h4>
-          {document.status === "processing" && (
-            <Badge
-              variant="secondary"
-              className="gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400"
-            >
-              <IconLoader2 className="h-3 w-3 animate-spin" />
-              Processing
-            </Badge>
-          )}
-          {document.status === "ready" && (
-            <Badge
-              variant="secondary"
-              className="gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-            >
-              <IconCheck className="h-3 w-3" />
-              Ready
-            </Badge>
-          )}
+          <DocumentStatusBadge status={document.status} />
         </div>
         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
           <span>{formatFileSize(document.fileSize)}</span>

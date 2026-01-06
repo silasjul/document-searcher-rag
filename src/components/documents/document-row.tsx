@@ -15,9 +15,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Document } from "@/lib/mock-data";
-import { cn, formatFileSize } from "@/lib/utils";
+import { formatFileSize } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { getStatusConfig } from "./utils";
+import { DocumentStatusBadge } from "./document-status-badge";
 
 export function DocumentRow({
   document,
@@ -26,9 +26,6 @@ export function DocumentRow({
   document: Document;
   onClick?: () => void;
 }) {
-  const statusConfig = getStatusConfig(document.status);
-  const StatusIcon = statusConfig.icon;
-
   return (
     <div
       className="group flex items-center gap-4 rounded-xl border border-border/50 bg-card/30 p-4 backdrop-blur-sm transition-all hover:border-border hover:bg-card/60 cursor-pointer"
@@ -45,13 +42,7 @@ export function DocumentRow({
           <h3 className="truncate font-medium text-foreground">
             {document.name}
           </h3>
-          <Badge
-            variant="outline"
-            className={cn("shrink-0", statusConfig.className)}
-          >
-            <StatusIcon className="mr-1 h-3 w-3" />
-            {statusConfig.label}
-          </Badge>
+          <DocumentStatusBadge status={document.status} className="shrink-0" />
         </div>
         <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
           <span>{document.pageCount} pages</span>

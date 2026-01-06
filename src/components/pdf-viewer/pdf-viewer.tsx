@@ -41,8 +41,6 @@ export function PdfViewer({ onClose }: PdfViewerProps) {
   const [scale, setScale] = useState<number>(1.0);
   const [rotation, setRotation] = useState<number>(0);
   const [inputValue, setInputValue] = useState<string>("1");
-  const [searchText, setSearchText] = useState<string>("");
-  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
   const [pageDimensions, setPageDimensions] = useState<
     Record<number, { width: number; height: number }>
   >({});
@@ -134,21 +132,6 @@ export function PdfViewer({ onClose }: PdfViewerProps) {
     }
   }
 
-  const textRenderer = useCallback(
-    (textItem: { str: string }) => {
-      if (!searchText) return textItem.str;
-
-      return textItem.str.replace(
-        new RegExp(
-          `(${searchText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
-          "gi"
-        ),
-        (match) => `<mark>${match}</mark>`
-      );
-    },
-    [searchText]
-  );
-
   const onPageLoadSuccess = useCallback(
     (page: {
       pageNumber: number;
@@ -179,33 +162,23 @@ export function PdfViewer({ onClose }: PdfViewerProps) {
     <div className="flex h-full w-full flex-col overflow-hidden bg-background text-foreground">
       {/* Toolbar */}
       <div className="flex h-14 items-center justify-between gap-2 border-b bg-muted/40 px-4 py-2 shadow-sm">
-        {/* Left: Search */}
+        {/* Left: Search Hint */}
         <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant={isSearchVisible ? "secondary" : "ghost"}
+                variant="ghost"
                 size="icon"
-                onClick={() => setIsSearchVisible(!isSearchVisible)}
+                className="cursor-default text-muted-foreground hover:text-foreground hover:bg-transparent"
               >
                 <Search className="h-4 w-4" />
-                <span className="sr-only">Search</span>
+                <span className="sr-only">Search (Ctrl + F)</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Search</TooltipContent>
+            <TooltipContent>
+              <p>Use your browser&apos;s search (Ctrl + F or Cmd + F)</p>
+            </TooltipContent>
           </Tooltip>
-
-          {isSearchVisible && (
-            <div className="flex items-center gap-1 animate-in fade-in slide-in-from-left-2">
-              <Input
-                placeholder="Find..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                className="h-8 w-40"
-                autoFocus
-              />
-            </div>
-          )}
         </div>
 
         {/* Center: Pagination */}
@@ -344,7 +317,6 @@ export function PdfViewer({ onClose }: PdfViewerProps) {
                   className="bg-white"
                   renderTextLayer={true}
                   renderAnnotationLayer={true}
-                  customTextRenderer={textRenderer}
                   onLoadSuccess={onPageLoadSuccess}
                   loading={
                     <div

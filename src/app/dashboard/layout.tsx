@@ -5,6 +5,7 @@ import { getCases } from "@/utils/cases/get-cases-data";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { CasesProvider } from "@/components/case-overview/cases-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export default async function DashboardLayout({
   children,
@@ -29,6 +30,7 @@ export default async function DashboardLayout({
           <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
         </SidebarInset>
       </CasesProvider>
+      <Toaster />
     </SidebarProvider>
   );
 }

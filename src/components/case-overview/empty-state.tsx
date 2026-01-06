@@ -10,14 +10,14 @@ export function EmptyState({ caseId }: { caseId: string }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="relative mx-auto max-w-lg"
+      className="relative mx-auto"
     >
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 flex items-center justify-center">
         <div className="h-72 w-72 rounded-full bg-linear-to-br from-primary/10 to-violet-500/10 blur-3xl" />
       </div>
 
-      <div className="flex flex-col items-center py-20 text-center">
+      <div className="flex flex-col items-center rounded-3xl border border-border/50 bg-card/50 px-8 py-20 text-center">
         {/* Animated icon container */}
         <motion.div
           initial={{ scale: 0 }}
@@ -31,10 +31,19 @@ export function EmptyState({ caseId }: { caseId: string }) {
           className="relative mb-8"
         >
           {/* Pulsing rings */}
-          <div className="absolute inset-0 animate-ping rounded-3xl bg-primary/20 delay-150" />
           <div
-            className="absolute inset-0 animate-ping rounded-3xl bg-primary/10"
-            style={{ animationDelay: "300ms" }}
+            className="absolute inset-0 rounded-3xl bg-primary/20"
+            style={{
+              animation: "ping-slow 2s infinite",
+              animationDelay: "150ms",
+            }}
+          />
+          <div
+            className="absolute inset-0 rounded-3xl bg-primary/10"
+            style={{
+              animation: "ping-slow 2s infinite",
+              animationDelay: "300ms",
+            }}
           />
 
           <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl border border-primary/20 bg-linear-to-br from-primary/10 to-violet-500/10 backdrop-blur-sm">

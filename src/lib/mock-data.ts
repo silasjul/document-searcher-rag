@@ -127,7 +127,7 @@ export const MOCK_DOCUMENTS: Document[] = [
   },
 ];
 
-export const MOCK_CASES: Case[] = [
+const INITIAL_CASES: Case[] = [
   {
     id: "case-1",
     name: "Odense Harbor Warehouse Lease",
@@ -143,6 +143,27 @@ export const MOCK_CASES: Case[] = [
     documentIds: ["doc-5", "doc-6", "doc-7"],
   },
 ];
+
+// Use global to persist data during dev server hot reloads and across server actions
+declare global {
+  var _mockCases: Case[] | undefined;
+}
+
+const getMockCases = () => {
+  // In the browser/client, just return the initial cases.
+  // The client shouldn't be mutating this directly anyway.
+  if (typeof window !== "undefined") {
+    return [...INITIAL_CASES];
+  }
+
+  // On the server (Node.js), use globalThis to persist data across hot reloads
+  if (!globalThis._mockCases) {
+    globalThis._mockCases = [...INITIAL_CASES];
+  }
+  return globalThis._mockCases;
+};
+
+export const MOCK_CASES = getMockCases();
 
 export const MOCK_CHATS: ChatSession[] = [
   // Chats for Case 1 (Lease)

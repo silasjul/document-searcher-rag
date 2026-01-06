@@ -27,7 +27,6 @@ import { formatFileSize } from "@/lib/utils";
 import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
 import { EmptyState } from "@/components/documents/empty-state";
-import { BackgroundGradients } from "@/components/background-gradients";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
 
 export default function DocumentsPage() {
@@ -95,8 +94,6 @@ export default function DocumentsPage() {
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden h-full">
-      <BackgroundGradients />
-
       <SplitViewLayout
         selectedDocumentId={selectedDocumentId}
         onClose={() => setSelectedDocumentId(null)}

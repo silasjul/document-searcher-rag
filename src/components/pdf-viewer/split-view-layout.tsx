@@ -6,9 +6,17 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { PdfViewer } from "./pdf-viewer";
 import { Button } from "../ui/button";
 import { IconX } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
+
+const PdfViewer = dynamic(
+  () => import("./pdf-viewer").then((mod) => mod.PdfViewer),
+  {
+    ssr: false,
+    loading: () => <p>Loading PDF Viewer...</p>,
+  }
+);
 
 interface SplitViewLayoutProps {
   children: ReactNode;
@@ -36,15 +44,7 @@ export function SplitViewLayout({
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} minSize={30} className="relative">
         <div className="absolute inset-0 overflow-hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-white/90 shadow-md hover:bg-white"
-            onClick={onClose}
-          >
-            <IconX className="h-4 w-4" />
-          </Button>
-          <PdfViewer documentId={selectedDocumentId} />
+          <PdfViewer documentId={selectedDocumentId} onClose={onClose} />
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>

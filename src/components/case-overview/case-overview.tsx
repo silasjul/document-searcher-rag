@@ -18,7 +18,6 @@ import { StatCard } from "./stat-card";
 import { DocumentCard } from "./document-card";
 import { ConversationCard } from "./conversation-card";
 import { EmptyState } from "./empty-state";
-import { BackgroundGradients } from "@/components/background-gradients";
 
 interface CaseOverviewProps {
   caseData: Case;
@@ -55,8 +54,6 @@ export function CaseOverview({
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden h-full">
-      <BackgroundGradients />
-
       <div className="relative h-full overflow-auto">
         <div className="mx-auto max-w-6xl px-6 py-12 md:px-8 md:py-16">
           {chats.length === 0 && documents.length === 0 ? (

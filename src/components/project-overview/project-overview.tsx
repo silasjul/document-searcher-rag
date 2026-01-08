@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Case, ChatSession, Document } from "@/lib/mock-data";
+import { Project, ChatSession, Document } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -19,22 +19,22 @@ import { StatCard } from "./stat-card";
 import { DocumentCard } from "./document-card";
 import { ConversationCard } from "./conversation-card";
 import { EmptyState } from "./empty-state";
-import { CreateCaseDialog } from "./create-case-dialog";
+import { CreateProjectDialog } from "./create-project-dialog";
 
-interface CaseOverviewProps {
-  caseData: Case;
+interface ProjectOverviewProps {
+  projectData: Project;
   chats: ChatSession[];
   documents: Document[];
   onDocumentClick?: (documentId: string) => void;
 }
 
 // Main Component
-export function CaseOverview({
-  caseData,
+export function ProjectOverview({
+  projectData,
   chats,
   documents,
   onDocumentClick,
-}: CaseOverviewProps) {
+}: ProjectOverviewProps) {
   const [isAddDocumentsOpen, setIsAddDocumentsOpen] = useState(false);
 
   const sortedChats = [...chats].sort(
@@ -69,10 +69,10 @@ export function CaseOverview({
                   className="mb-4 gap-1.5 bg-primary/10 text-primary"
                 >
                   <IconBolt className="h-3 w-3" />
-                  Active Case
+                  Active Project
                 </Badge>
                 <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                  Case Overview
+                  Project Overview
                 </h1>
                 <p className="mt-2 text-muted-foreground">
                   {chats.length} conversation{chats.length !== 1 ? "s" : ""} •{" "}
@@ -91,7 +91,7 @@ export function CaseOverview({
               </div>
 
               <Button size="lg" className="group gap-2 font-semibold" asChild>
-                <Link href={`/dashboard/case/${caseData.id}?chatid=new`}>
+                <Link href={`/dashboard/project/${projectData.id}?chatid=new`}>
                   <IconPlus className="h-5 w-5 transition-transform group-hover:rotate-90" />
                   New conversation
                 </Link>
@@ -136,14 +136,14 @@ export function CaseOverview({
                     <div key={chat.id}>
                       <ConversationCard
                         chat={chat}
-                        caseId={caseData.id}
+                        projectId={projectData.id}
                         index={index}
                       />
                     </div>
                   ))}
                 </div>
               ) : (
-                <EmptyState caseId={caseData.id} />
+                <EmptyState projectId={projectData.id} />
               )}
             </div>
 
@@ -155,7 +155,7 @@ export function CaseOverview({
                     Documents
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    PDF files uploaded to this case
+                    PDF files uploaded to this project
                   </p>
                 </div>
                 <Button
@@ -219,7 +219,9 @@ export function CaseOverview({
                   </p>
                 </div>
                 <Button variant="outline" className="gap-2 shrink-0" asChild>
-                  <Link href={`/dashboard/case/${caseData.id}?chatid=new`}>
+                  <Link
+                    href={`/dashboard/project/${projectData.id}?chatid=new`}
+                  >
                     <IconMessage className="h-4 w-4" />
                     Ask AI
                   </Link>
@@ -231,12 +233,12 @@ export function CaseOverview({
       </div>
 
       {/* Add Documents Dialog */}
-      <CreateCaseDialog
+      <CreateProjectDialog
         open={isAddDocumentsOpen}
         onOpenChange={setIsAddDocumentsOpen}
-        caseId={caseData.id}
-        caseName={caseData.name}
-        existingDocumentIds={caseData.documentIds}
+        projectId={projectData.id}
+        projectName={projectData.name}
+        existingDocumentIds={projectData.documentIds}
       />
     </div>
   );

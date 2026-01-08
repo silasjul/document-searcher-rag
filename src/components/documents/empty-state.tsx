@@ -17,7 +17,7 @@ export function EmptyState() {
       </h3>
       <p className="mt-2 max-w-sm text-sm text-muted-foreground">
         Upload PDF files to your document library. You can then use them to
-        provide context for AI conversations in your cases.
+        provide context for AI conversations in your projects.
       </p>
       <Button className="mt-6 gap-2">
         <IconUpload className="h-4 w-4" />

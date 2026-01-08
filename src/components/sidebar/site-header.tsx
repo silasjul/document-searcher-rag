@@ -4,15 +4,15 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useParams, usePathname } from "next/navigation";
 
-import { CaseNameInput } from "@/components/case-overview/case-name-input";
-import { useCases } from "@/components/case-overview/cases-provider";
+import { ProjectNameInput } from "@/components/project-overview/project-name-input";
+import { useProjects } from "@/components/project-overview/projects-provider";
 
 export function SiteHeader() {
-  const { cases, updateCaseNameOptimistic } = useCases();
+  const { projects, updateProjectNameOptimistic } = useProjects();
   const params = useParams();
   const pathname = usePathname();
-  const caseId = params?.caseId as string | undefined;
-  const activeCase = cases.find((c) => c.id === caseId);
+  const projectId = params?.projectId as string | undefined;
+  const activeProject = projects.find((p) => p.id === projectId);
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -22,15 +22,15 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        {activeCase ? (
-          <CaseNameInput
-            key={activeCase.id}
-            caseId={activeCase.id}
-            initialName={activeCase.name}
+        {activeProject ? (
+          <ProjectNameInput
+            key={activeProject.id}
+            projectId={activeProject.id}
+            initialName={activeProject.name}
             className="w-50 sm:w-75"
             autoFocus={false}
             onRename={(newName) =>
-              updateCaseNameOptimistic(activeCase.id, newName)
+              updateProjectNameOptimistic(activeProject.id, newName)
             }
           />
         ) : (

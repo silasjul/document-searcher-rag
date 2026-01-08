@@ -12,7 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { CreateCaseDialog } from "@/components/case-overview/create-case-dialog";
+import { CreateProjectDialog } from "@/components/project-overview/create-project-dialog";
 
 export function NavMain() {
   const pathname = usePathname();
@@ -54,14 +54,14 @@ export function NavMain() {
                 onClick={() => setIsCreateDialogOpen(true)}
               >
                 <IconCirclePlusFilled />
-                <span>New Case</span>
+                <span>New Project</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroupContent>
       </SidebarGroup>
 
-      <CreateCaseDialog
+      <CreateProjectDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
       />

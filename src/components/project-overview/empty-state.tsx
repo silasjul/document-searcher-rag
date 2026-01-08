@@ -4,7 +4,7 @@ import { IconSparkles, IconPlus, IconBolt } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-export function EmptyState({ caseId }: { caseId: string }) {
+export function EmptyState({ projectId }: { projectId: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -69,7 +69,7 @@ export function EmptyState({ caseId }: { caseId: string }) {
           transition={{ delay: 0.4 }}
           className="mb-8 max-w-sm text-muted-foreground"
         >
-          Create a new AI-powered conversation to analyze your case documents,
+          Create a new AI-powered conversation to analyze your project documents,
           extract insights, and get instant answers.
         </motion.p>
 
@@ -83,7 +83,7 @@ export function EmptyState({ caseId }: { caseId: string }) {
             className="group relative gap-2 overflow-hidden font-semibold"
             asChild
           >
-            <Link href={`/dashboard/case/${caseId}?chatid=new`}>
+            <Link href={`/dashboard/project/${projectId}?chatid=new`}>
               <IconPlus className="h-5 w-5 transition-transform group-hover:rotate-90" />
               New conversation
               <IconBolt className="ml-1 h-4 w-4" />

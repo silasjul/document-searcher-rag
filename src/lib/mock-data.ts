@@ -1,14 +1,14 @@
-export type Case = {
+export type Project = {
   id: string;
   name: string;
-  clientName: string;
+  description: string;
   status: "active" | "archived";
   documentIds: string[]; // References to documents from the library
 };
 
 export type ChatSession = {
   id: string;
-  caseId: string;
+  projectId: string;
   title: string; // e.g. "Lease Analysis"
   updatedAt: string;
 };
@@ -127,18 +127,18 @@ export const MOCK_DOCUMENTS: Document[] = [
   },
 ];
 
-const INITIAL_CASES: Case[] = [
+const INITIAL_PROJECTS: Project[] = [
   {
-    id: "case-1",
+    id: "project-1",
     name: "Odense Harbor Warehouse Lease",
-    clientName: "Mærsk Logistics",
+    description: "Project for Mærsk Logistics",
     status: "active",
     documentIds: ["doc-1", "doc-2", "doc-3", "doc-4"],
   },
   {
-    id: "case-2",
+    id: "project-2",
     name: "TechStart Acquisition Merger",
-    clientName: "Nordic Capital",
+    description: "Project for Nordic Capital",
     status: "active",
     documentIds: ["doc-5", "doc-6", "doc-7"],
   },
@@ -146,43 +146,43 @@ const INITIAL_CASES: Case[] = [
 
 // Use global to persist data during dev server hot reloads and across server actions
 declare global {
-  var _mockCases: Case[] | undefined;
+  var _mockProjects: Project[] | undefined;
 }
 
-const getMockCases = () => {
-  // In the browser/client, just return the initial cases.
+const getMockProjects = () => {
+  // In the browser/client, just return the initial projects.
   // The client shouldn't be mutating this directly anyway.
   if (typeof window !== "undefined") {
-    return [...INITIAL_CASES];
+    return [...INITIAL_PROJECTS];
   }
 
   // On the server (Node.js), use globalThis to persist data across hot reloads
-  if (!globalThis._mockCases) {
-    globalThis._mockCases = [...INITIAL_CASES];
+  if (!globalThis._mockProjects) {
+    globalThis._mockProjects = [...INITIAL_PROJECTS];
   }
-  return globalThis._mockCases;
+  return globalThis._mockProjects;
 };
 
-export const MOCK_CASES = getMockCases();
+export const MOCK_PROJECTS = getMockProjects();
 
 export const MOCK_CHATS: ChatSession[] = [
-  // Chats for Case 1 (Lease)
+  // Chats for Project 1 (Lease)
   {
     id: "chat-1-a",
-    caseId: "case-1",
+    projectId: "project-1",
     title: "Termination Clauses",
     updatedAt: "2024-03-10T14:00:00Z",
   },
   {
     id: "chat-1-b",
-    caseId: "case-1",
+    projectId: "project-1",
     title: "Rent Escalation Review",
     updatedAt: "2024-03-09T09:30:00Z",
   },
-  // Chats for Case 2 (Merger)
+  // Chats for Project 2 (Merger)
   {
     id: "chat-2-a",
-    caseId: "case-2",
+    projectId: "project-2",
     title: "IP Indemnity Risk",
     updatedAt: "2024-03-08T16:45:00Z",
   },

@@ -1,10 +1,10 @@
 import React from "react";
 
 import { SiteHeader } from "@/components/sidebar/site-header";
-import { getCases } from "@/utils/cases/get-cases-data";
+import { getProjects } from "@/utils/projects/get-projects-data";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
-import { CasesProvider } from "@/components/case-overview/cases-provider";
+import { ProjectsProvider } from "@/components/project-overview/projects-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 export default async function DashboardLayout({
@@ -12,7 +12,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cases = await getCases();
+  const projects = await getProjects();
 
   return (
     <SidebarProvider
@@ -23,13 +23,13 @@ export default async function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      <CasesProvider cases={cases}>
+      <ProjectsProvider projects={projects}>
         <AppSidebar variant="inset" />
         <SidebarInset className="max-h-svh overflow-hidden">
           <SiteHeader />
           <div className="flex flex-1 flex-col overflow-hidden">{children}</div>
         </SidebarInset>
-      </CasesProvider>
+      </ProjectsProvider>
       <Toaster />
     </SidebarProvider>
   );

@@ -116,7 +116,7 @@ export default function DocumentsPage() {
                   </h1>
                   <p className="mt-2 text-muted-foreground">
                     Upload and manage PDF files for AI-powered analysis across
-                    your cases.
+                    your projects.
                   </p>
                 </div>
 

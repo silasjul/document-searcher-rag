@@ -3,7 +3,7 @@
 import Image from "next/image";
 import * as React from "react";
 
-import { NavCases } from "@/components/sidebar/nav-cases";
+import { NavProjects } from "@/components/sidebar/nav-projects";
 import { NavMain } from "@/components/sidebar/nav-main";
 import { NavSecondary } from "@/components/sidebar/nav-secondary";
 import { NavUser } from "@/components/sidebar/nav-user";
@@ -62,7 +62,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain />
-        <NavCases />
+        <NavProjects />
         <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

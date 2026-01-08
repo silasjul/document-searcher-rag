@@ -4,14 +4,14 @@ import { cache } from "react";
 import {
   MOCK_DOCUMENTS,
   Document,
-  MOCK_CASES,
+  MOCK_PROJECTS,
 } from "@/lib/mock-data";
 
-// Helper function to get documents for a case
-export async function getDocumentsForCase(caseId: string): Promise<Document[]> {
-  const caseData = MOCK_CASES.find((c) => c.id === caseId);
-  if (!caseData) return [];
-  return MOCK_DOCUMENTS.filter((doc) => caseData.documentIds.includes(doc.id));
+// Helper function to get documents for a project
+export async function getDocumentsForProject(projectId: string): Promise<Document[]> {
+  const projectData = MOCK_PROJECTS.find((p) => p.id === projectId);
+  if (!projectData) return [];
+  return MOCK_DOCUMENTS.filter((doc) => projectData.documentIds.includes(doc.id));
 }
 
 export const getAllDocuments = cache(async (): Promise<Document[]> => {

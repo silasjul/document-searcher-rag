@@ -8,7 +8,7 @@ export default function Page() {
           Welcome to Document RAG
         </h1>
         <p className="text-muted-foreground">
-          Log in to access your dashboard, explore cases, and search documents.
+          Log in to access your dashboard, explore projects, and search documents.
         </p>
         <div className="flex items-center justify-center gap-3">
           <Link

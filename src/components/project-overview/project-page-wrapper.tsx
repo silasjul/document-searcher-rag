@@ -1,24 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { Case, ChatSession, Document } from "@/lib/mock-data";
+import { Project, ChatSession, Document } from "@/lib/mock-data";
 import { Chat } from "@/components/chat";
-import { CaseOverview } from "@/components/case-overview/case-overview";
+import { ProjectOverview } from "@/components/project-overview/project-overview";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
 
-interface CasePageWrapperProps {
-  caseData: Case;
+interface ProjectPageWrapperProps {
+  projectData: Project;
   chats: ChatSession[];
   documents: Document[];
   chatId?: string;
 }
 
-export function CasePageWrapper({
-  caseData,
+export function ProjectPageWrapper({
+  projectData,
   chats,
   documents,
   chatId,
-}: CasePageWrapperProps) {
+}: ProjectPageWrapperProps) {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null
   );
@@ -26,7 +26,7 @@ export function CasePageWrapper({
   if (chatId) {
     return (
       <div className="@container/main flex flex-1 flex-col h-full overflow-hidden">
-        <Chat chatId={chatId} caseData={caseData} />
+        <Chat chatId={chatId} projectData={projectData} />
       </div>
     );
   }
@@ -37,8 +37,8 @@ export function CasePageWrapper({
         selectedDocumentId={selectedDocumentId}
         onClose={() => setSelectedDocumentId(null)}
       >
-        <CaseOverview
-          caseData={caseData}
+        <ProjectOverview
+          projectData={projectData}
           chats={chats}
           documents={documents}
           onDocumentClick={setSelectedDocumentId}

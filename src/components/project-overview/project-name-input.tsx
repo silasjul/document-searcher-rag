@@ -2,11 +2,11 @@
 
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
-import { updateCaseName } from "@/utils/cases/cases-actions";
+import { updateProjectName } from "@/utils/projects/projects-actions";
 import { cn } from "@/lib/utils";
 
-interface CaseNameInputProps {
-  caseId: string;
+interface ProjectNameInputProps {
+  projectId: string;
   initialName: string;
   className?: string;
   onFinished?: () => void;
@@ -14,14 +14,14 @@ interface CaseNameInputProps {
   onRename?: (newName: string) => void;
 }
 
-export function CaseNameInput({
-  caseId,
+export function ProjectNameInput({
+  projectId,
   initialName,
   className,
   onFinished,
   autoFocus = false,
   onRename,
-}: CaseNameInputProps) {
+}: ProjectNameInputProps) {
   const [value, setValue] = useState(initialName);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function CaseNameInput({
     onRename?.(value);
     onFinished?.();
 
-    await updateCaseName(caseId, value);
+    await updateProjectName(projectId, value);
   }
 
   return (
@@ -62,7 +62,7 @@ export function CaseNameInput({
         "h-8 border-none shadow-none focus-visible:ring-1 focus-visible:bg-muted/50 dark:focus-visible:bg-input bg-transparent dark:bg-transparent px-2 text-base font-medium hover:bg-transparent dark:hover:bg-transparent hover:ring-foreground/10 hover:ring-1 transition-all duration-100 ease-linear",
         className
       )}
-      placeholder="Untitled Case"
+      placeholder="Untitled Project"
     />
   );
 }

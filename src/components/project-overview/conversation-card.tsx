@@ -6,11 +6,11 @@ import { formatDistanceToNow, format } from "date-fns";
 
 export function ConversationCard({
   chat,
-  caseId,
+  projectId,
   index,
 }: {
   chat: ChatSession;
-  caseId: string;
+  projectId: string;
   index: number;
 }) {
   const updatedDate = new Date(chat.updatedAt);
@@ -18,7 +18,7 @@ export function ConversationCard({
   return (
     <div>
       <Link
-        href={`/dashboard/case/${caseId}?chatid=${chat.id}`}
+        href={`/dashboard/project/${projectId}?chatid=${chat.id}`}
         className="group block"
       >
         <motion.div

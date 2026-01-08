@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { Case } from "@/lib/mock-data";
+import { Project } from "@/lib/mock-data";
 import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
 
-export function Chat({ chatId, caseData }: { chatId: string; caseData: Case }) {
+export function Chat({ chatId, projectData }: { chatId: string; projectData: Project }) {
   const [input, setInput] = useState("");
   const { messages, sendMessage } = useChat();
 

@@ -59,6 +59,7 @@ A sophisticated RAG (Retrieval-Augmented Generation) application for semantic do
 - **Hybrid Search**: Combines semantic (dense) and keyword (BM25/sparse) search for optimal retrieval
 - **Advanced Reranking**: Two-stage reranking (Custom RRF → Cohere) for precision
 - **PDF Processing**: Automatic chunking with bounding box extraction for visual context
+- **Precise Highlighting**: AI extracts exact text snippets used in answers via structured schema, then performs reverse lookup using PyMuPDF's `page.search_for()` for pixel-perfect highlighting
 - **User Authentication**: Secure auth via Supabase
 - **Chat History**: Persistent conversation storage per user
 - **Multi-tenant**: User-scoped document access via `user_id` metadata
@@ -70,6 +71,13 @@ A sophisticated RAG (Retrieval-Augmented Generation) application for semantic do
   - Post-RRF results
   - Final reranked results
 - **Transparency**: Inspect scoring and ranking at each step
+- **Citation Tracking**: View exact text snippets the AI used to generate each answer
+
+### Highlighting Pipeline
+1. **AI Response**: LLM returns answer with structured schema containing exact text snippets used
+2. **Reverse Lookup**: Backend uses PyMuPDF's `page.search_for()` to locate exact coordinates
+3. **Frontend Display**: Highlights precise text regions in PDF viewer
+4. **Fallback**: Uses chunk bounding boxes when exact text match isn't found
 
 ### Metadata Schema
 Each document chunk stored in Pinecone includes:
@@ -95,9 +103,13 @@ Each document chunk stored in Pinecone includes:
 ### Backend (Python)
 - **Framework**: FastAPI
 - **Document Processing**: PyMuPDF (fitz)
+  - Chunking with bounding box extraction
+  - Reverse text lookup via `page.search_for()`
+  - Precise coordinate retrieval for highlighting
 - **Vector Operations**: Pinecone SDK
 - **Reranking**: Cohere API
 - **Embeddings**: (TBD - OpenAI/Cohere/HuggingFace)
+- **LLM Response**: Structured output schema for exact citation extraction
 
 ### Infrastructure
 - **Vector DB**: Pinecone (Serverless)

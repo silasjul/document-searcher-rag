@@ -30,6 +30,7 @@ import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
 import { EmptyState } from "@/components/documents/empty-state";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
+import { SAMPLE_HIGHLIGHTS, type PdfHighlight } from "@/components/pdf-viewer/pdf-viewer";
 
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<"library" | "global">("library");
@@ -107,11 +108,18 @@ export default function DocumentsPage() {
     return { ready, processing, error, totalSize, totalPages, total: docs.length };
   }, [currentDocuments]);
 
+  // Handle highlight clicks - in a real app, this could show details, copy text, etc.
+  const handleHighlightClick = (highlight: PdfHighlight) => {
+    console.log("Highlight clicked:", highlight.label, "on page", highlight.pageNumber);
+  };
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden h-full">
       <SplitViewLayout
         selectedDocumentId={selectedDocumentId}
         onClose={() => setSelectedDocumentId(null)}
+        highlights={SAMPLE_HIGHLIGHTS}
+        onHighlightClick={handleHighlightClick}
       >
         <div className="relative h-full overflow-auto">
           <div className="mx-auto max-w-6xl px-6 py-12 md:px-8 md:py-16">

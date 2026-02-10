@@ -63,7 +63,7 @@ A sophisticated RAG (Retrieval-Augmented Generation) application for semantic do
 - **Chat History**: Persistent conversation storage per user
 - **Multi-tenant**: User-scoped document access via `user_id` metadata
 
-### Developer Features
+### Show Reasoning
 - **Debug Mode**: Visualize search pipeline results at each stage
   - Raw semantic search results
   - Raw BM25 search results
@@ -79,21 +79,18 @@ Each document chunk stored in Pinecone includes:
   "text": "string",
   "bounding_box": {"x": 0, "y": 0, "width": 0, "height": 0},
   "title": "string",
-  "page_num": "integer"
+  "page_num": "integer",
+  "file_id": "UUID",
+  "chunk_index": "integer"
 }
 ```
 
 ## Tech Stack
 
 ### Frontend (Next.js)
-- **Framework**: Next.js 14+ with App Router
+- **Framework**: Next.js
 - **Language**: TypeScript
 - **Styling**: TailwindCSS
-- **Features**: 
-  - PDF viewer with bounding box highlighting
-  - Real-time search results
-  - Debug mode visualization
-  - Chat interface
 
 ### Backend (Python)
 - **Framework**: FastAPI

@@ -6,13 +6,27 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { ProjectsProvider } from "@/components/project-overview/projects-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const projects = await getProjects();
+  const [projects, supabase] = await Promise.all([
+    getProjects(),
+    createClient(),
+  ]);
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const userData = {
+    name: user?.user_metadata?.full_name ?? "",
+    email: user?.email ?? "",
+    avatar: user?.user_metadata?.avatar_url ?? "",
+  };
 
   return (
     <SidebarProvider
@@ -24,7 +38,7 @@ export default async function DashboardLayout({
       }
     >
       <ProjectsProvider projects={projects}>
-        <AppSidebar variant="inset" />
+        <AppSidebar variant="inset" user={userData} />
         <SidebarInset className="max-h-svh overflow-hidden">
           <SiteHeader />
           <div className="flex flex-1 flex-col overflow-hidden">{children}</div>

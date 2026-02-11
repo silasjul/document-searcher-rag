@@ -30,7 +30,10 @@ import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
 import { EmptyState } from "@/components/documents/empty-state";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
-import { SAMPLE_HIGHLIGHTS, type PdfHighlight } from "@/components/pdf-viewer/pdf-viewer";
+import {
+  SAMPLE_HIGHLIGHTS,
+  type PdfHighlight,
+} from "@/components/pdf-viewer/types";
 
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<"library" | "global">("library");

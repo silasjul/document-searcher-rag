@@ -7,7 +7,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import dynamic from "next/dynamic";
-import type { PdfHighlight, PdfViewerRef } from "./pdf-viewer";
+import type { PdfHighlight } from "./types";
+import type { PdfViewerRef } from "./pdf-viewer";
 
 const PdfViewer = dynamic(
   () => import("./pdf-viewer").then((mod) => mod.PdfViewer),
@@ -156,7 +157,7 @@ export function SplitViewExample() {
             >
               <div className="flex items-start gap-2">
                 <div
-                  className="w-3 h-3 rounded-full mt-1 flex-shrink-0"
+                  className="w-3 h-3 rounded-full mt-1 shrink-0"
                   style={{ backgroundColor: highlight.color }}
                 />
                 <div>

@@ -37,7 +37,7 @@ Document Searching App with Advanced RAG
 
 A sophisticated RAG (Retrieval-Augmented Generation) application for semantic document search and question-answering. This system combines dense vector search, sparse BM25 search, and advanced reranking techniques to provide highly accurate document retrieval from PDF files.
 
-**Planning Document** - This project is currently in the planning/design phase.
+**Planning Document** - This project is currently in development.
 
 ## Architecture Overview
 

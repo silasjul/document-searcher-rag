@@ -37,9 +37,15 @@ export async function updateSession(request: NextRequest) {
 
   const user = data?.claims
 
+  // Redirect authenticated users from root to dashboard
+  if (user && request.nextUrl.pathname === '/') {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    return NextResponse.redirect(url)
+  }
+
   if (
     !user &&
-    request.nextUrl.pathname !== '/' &&
     !request.nextUrl.pathname.startsWith('/login') &&
     !request.nextUrl.pathname.startsWith('/signup')
   ) {

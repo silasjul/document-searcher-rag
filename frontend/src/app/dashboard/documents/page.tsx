@@ -10,6 +10,7 @@ import {
   IconAlertTriangle,
   IconFilter,
   IconSortDescending,
+  IconTag,
   IconLibrary,
   IconWorld,
 } from "@tabler/icons-react";
@@ -63,6 +64,7 @@ export default function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
+  const [tagFilter, setTagFilter] = useState<string>("all");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
   );
@@ -202,6 +204,11 @@ export default function DocumentsPage() {
       docs = docs.filter((doc) => doc.status === statusFilter);
     }
 
+    // Apply tag filter
+    if (tagFilter !== "all") {
+      docs = docs.filter((doc) => doc.tags.some((tag) => tag.id === tagFilter));
+    }
+
     // Apply sorting
     docs.sort((a, b) => {
       switch (sortBy) {
@@ -223,7 +230,7 @@ export default function DocumentsPage() {
     });
 
     return docs;
-  }, [currentDocuments, searchTerm, statusFilter, sortBy]);
+  }, [currentDocuments, searchTerm, statusFilter, tagFilter, sortBy]);
 
   const stats = useMemo(() => {
     const docs = currentDocuments;
@@ -374,6 +381,7 @@ export default function DocumentsPage() {
                 onValueChange={(v) => {
                   setActiveTab(v as "library" | "global");
                   setStatusFilter("all");
+                  setTagFilter("all");
                   setSearchTerm("");
                 }}
               >
@@ -428,7 +436,7 @@ export default function DocumentsPage() {
                 />
                 <StatCard
                   icon={IconAlertTriangle}
-                  label="Errors"
+                  label="Failed"
                   value={stats.error}
                   onClick={() => setStatusFilter("failed")}
                   isActive={statusFilter === "failed"}
@@ -465,6 +473,27 @@ export default function DocumentsPage() {
                       </SelectContent>
                     </Select>
 
+                    <Select value={tagFilter} onValueChange={setTagFilter}>
+                      <SelectTrigger className="w-35">
+                        <IconTag className="h-4 w-4" />
+                        <SelectValue placeholder="Tag" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        <SelectItem value="all">All tags</SelectItem>
+                        {userTags.map((tag) => (
+                          <SelectItem key={tag.id} value={tag.id}>
+                            <span className="flex items-center gap-2">
+                              <span
+                                className="inline-block h-2.5 w-2.5 rounded-full"
+                                style={{ backgroundColor: tag.color }}
+                              />
+                              {tag.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
                     <Select value={sortBy} onValueChange={setSortBy}>
                       <SelectTrigger className="w-35">
                         <IconSortDescending className="h-4 w-4" />
@@ -483,7 +512,7 @@ export default function DocumentsPage() {
                 {/* Documents List */}
                 <div className="space-y-3">
                   {filteredDocuments.length === 0 ? (
-                    searchTerm || statusFilter !== "all" ? (
+                    searchTerm || statusFilter !== "all" || tagFilter !== "all" ? (
                       <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/50 bg-muted/20 py-12 text-center">
                         <IconSearch className="mb-3 h-8 w-8 text-muted-foreground" />
                         <h3 className="font-medium text-foreground">
@@ -498,6 +527,7 @@ export default function DocumentsPage() {
                           onClick={() => {
                             setSearchTerm("");
                             setStatusFilter("all");
+                            setTagFilter("all");
                           }}
                         >
                           Clear filters

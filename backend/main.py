@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.routes.files import router as files_router
+from app.routes.users import router as users_router
 
 app = FastAPI(title="Document Searcher API")
 
@@ -13,6 +14,7 @@ app.add_middleware(
 )
 
 app.include_router(files_router)
+app.include_router(users_router)
 
 
 @app.get("/")

@@ -68,4 +68,20 @@ export async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return res.json();
 }
 
+export async function apiDelete<T = void>(path: string): Promise<T> {
+  const headers = await getAuthHeaders();
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "DELETE",
+    headers,
+  });
+
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ detail: res.statusText }));
+    throw new ApiError(res.status, detail.detail ?? "Request failed");
+  }
+
+  return res.json();
+}
+
 export { ApiError };

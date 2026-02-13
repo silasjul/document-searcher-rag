@@ -2,7 +2,22 @@
 
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { Document } from "@/lib/types";
+import type { Document, Tag } from "@/lib/types";
+
+/** Normalise the nested file_tags join into a flat Tag[]. */
+function parseDocumentWithTags(raw: Record<string, unknown>): Document {
+  const fileTags = (raw.file_tags ?? []) as Array<{
+    tag_id: string;
+    tags: Tag | null;
+  }>;
+
+  const tags: Tag[] = fileTags
+    .map((ft) => ft.tags)
+    .filter((t): t is Tag => t !== null);
+
+  const { file_tags: _unused, ...rest } = raw;
+  return { ...rest, tags } as Document;
+}
 
 /**
  * Get all documents linked to a project via the project_documents junction table.
@@ -12,10 +27,9 @@ export async function getDocumentsForProject(
 ): Promise<Document[]> {
   const supabase = await createClient();
 
-  // Query the junction table and join the files data
   const { data, error } = await supabase
     .from("project_documents")
-    .select("file_id, files(*)")
+    .select("file_id, files(*, file_tags(tag_id, tags(*)))")
     .eq("project_id", projectId);
 
   if (error) {
@@ -23,10 +37,13 @@ export async function getDocumentsForProject(
     return [];
   }
 
-  // Extract the nested file objects
   return (data ?? [])
-    .map((row) => row.files as unknown as Document)
-    .filter(Boolean);
+    .map((row) =>
+      row.files
+        ? parseDocumentWithTags(row.files as unknown as Record<string, unknown>)
+        : null,
+    )
+    .filter((d): d is Document => d !== null);
 }
 
 /**
@@ -37,7 +54,7 @@ export const getAllDocuments = cache(async (): Promise<Document[]> => {
 
   const { data, error } = await supabase
     .from("files")
-    .select("*")
+    .select("*, file_tags(tag_id, tags(*))")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -45,5 +62,7 @@ export const getAllDocuments = cache(async (): Promise<Document[]> => {
     return [];
   }
 
-  return data ?? [];
+  return (data ?? []).map((d) =>
+    parseDocumentWithTags(d as unknown as Record<string, unknown>),
+  );
 });

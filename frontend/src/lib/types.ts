@@ -43,6 +43,14 @@ export type FileStatus =
   | "completed"
   | "failed";
 
+export type Tag = {
+  id: string;
+  user_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+};
+
 export type Document = {
   id: string;
   user_id: string;
@@ -54,7 +62,7 @@ export type Document = {
   status: FileStatus;
   error_message: string | null;
   is_global: boolean;
-  tags: string[];
+  tags: Tag[];
   created_at: string;
   updated_at: string;
 };

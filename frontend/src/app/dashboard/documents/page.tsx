@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Document } from "@/lib/types";
+import type { Document, Tag } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
 import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
@@ -38,16 +38,37 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { apiGet } from "@/lib/api-client";
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Supabase returns file_tags as nested objects; this normalises them into Tag[]. */
+function parseDocumentWithTags(raw: Record<string, unknown>): Document {
+  const fileTags = (raw.file_tags ?? []) as Array<{
+    tag_id: string;
+    tags: Tag | null;
+  }>;
+
+  const tags: Tag[] = fileTags
+    .map((ft) => ft.tags)
+    .filter((t): t is Tag => t !== null);
+
+  // Remove the raw nested field and replace with flat tags array
+  const { file_tags: _unused, ...rest } = raw;
+  return { ...rest, tags } as Document;
+}
+
+// ── Page component ──────────────────────────────────────────────────────────
+
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<"library" | "global">("library");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
-    null
+    null,
   );
   const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [userTags, setUserTags] = useState<Tag[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
@@ -60,7 +81,7 @@ export default function DocumentsPage() {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("files")
-      .select("*")
+      .select("*, file_tags(tag_id, tags(*))")
       .in("id", fileIds);
 
     if (error) {
@@ -69,49 +90,92 @@ export default function DocumentsPage() {
     }
 
     if (data && data.length > 0) {
+      const parsed = data.map((d) =>
+        parseDocumentWithTags(d as unknown as Record<string, unknown>),
+      );
       setDocuments((prev) => {
-        // Filter out any existing docs with the same IDs (shouldn't happen, but safe)
-        const existingIds = new Set(data.map((d) => d.id));
+        const existingIds = new Set(parsed.map((d) => d.id));
         const filtered = prev.filter((d) => !existingIds.has(d.id));
-        // Prepend new documents (they're newest)
-        return [...data, ...filtered];
+        return [...parsed, ...filtered];
       });
     }
   }, []);
 
-  // Fetch all documents from Supabase on initial mount
+  // Fetch all documents + user tags from Supabase on initial mount
   useEffect(() => {
     let cancelled = false;
 
-    async function loadDocuments() {
+    async function loadData() {
       const supabase = createClient();
-      const { data, error } = await supabase
-        .from("files")
-        .select("*")
-        .order("created_at", { ascending: false });
+
+      // Fetch documents with their tags via the junction table
+      const [docsResult, tagsResult] = await Promise.all([
+        supabase
+          .from("files")
+          .select("*, file_tags(tag_id, tags(*))")
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("tags")
+          .select("*")
+          .order("name", { ascending: true }),
+      ]);
 
       if (cancelled) return;
 
-      if (error) {
-        console.error("Failed to fetch documents:", error.message);
+      if (docsResult.error) {
+        console.error(
+          "Failed to fetch documents:",
+          docsResult.error.message,
+        );
       } else {
-        setDocuments(data ?? []);
+        const parsed = (docsResult.data ?? []).map((d) =>
+          parseDocumentWithTags(d as unknown as Record<string, unknown>),
+        );
+        setDocuments(parsed);
       }
+
+      if (tagsResult.error) {
+        console.error("Failed to fetch tags:", tagsResult.error.message);
+      } else {
+        setUserTags(tagsResult.data ?? []);
+      }
+
       setIsInitialLoad(false);
     }
 
-    loadDocuments();
-    return () => { cancelled = true; };
+    loadData();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // When a new tag is created (from any DocumentRow), add it to the user's tag list
+  const handleTagCreated = useCallback((tag: Tag) => {
+    setUserTags((prev) => {
+      if (prev.some((t) => t.id === tag.id)) return prev;
+      return [...prev, tag].sort((a, b) => a.name.localeCompare(b.name));
+    });
+  }, []);
+
+  // When a tag is permanently deleted, remove it from the user's list and all documents
+  const handleTagDeleted = useCallback((tagId: string) => {
+    setUserTags((prev) => prev.filter((t) => t.id !== tagId));
+    setDocuments((prev) =>
+      prev.map((doc) => ({
+        ...doc,
+        tags: doc.tags.filter((t) => t.id !== tagId),
+      })),
+    );
   }, []);
 
   // Separate documents into library and global
   const libraryDocuments = useMemo(
     () => documents.filter((doc) => !doc.is_global),
-    [documents]
+    [documents],
   );
   const globalDocuments = useMemo(
     () => documents.filter((doc) => doc.is_global),
-    [documents]
+    [documents],
   );
 
   const currentDocuments =
@@ -119,25 +183,26 @@ export default function DocumentsPage() {
 
   // Filter and sort documents
   const filteredDocuments = useMemo(() => {
-    // 1. Start with a fresh copy of the current tab's documents
     let docs = [...currentDocuments];
 
-    // 2. Apply search filter
+    // Apply search filter
     const normalizedSearch = searchTerm.toLowerCase().trim();
     if (normalizedSearch) {
       docs = docs.filter(
         (doc) =>
           doc.original_name.toLowerCase().includes(normalizedSearch) ||
-          doc.tags.some((tag) => tag.toLowerCase().includes(normalizedSearch))
+          doc.tags.some((tag) =>
+            tag.name.toLowerCase().includes(normalizedSearch),
+          ),
       );
     }
 
-    // 3. Apply status filter
+    // Apply status filter
     if (statusFilter !== "all") {
       docs = docs.filter((doc) => doc.status === statusFilter);
     }
 
-    // 4. Apply sorting
+    // Apply sorting
     docs.sort((a, b) => {
       switch (sortBy) {
         case "newest":
@@ -164,35 +229,40 @@ export default function DocumentsPage() {
     const docs = currentDocuments;
     const ready = docs.filter((d) => d.status === "completed").length;
     const processing = docs.filter(
-      (d) => d.status === "processing" || d.status === "queued"
+      (d) => d.status === "processing" || d.status === "queued",
     ).length;
     const error = docs.filter((d) => d.status === "failed").length;
     const totalSize = docs.reduce((acc, d) => acc + d.file_size, 0);
     const totalPages = docs.reduce((acc, d) => acc + d.page_count, 0);
 
-    return { ready, processing, error, totalSize, totalPages, total: docs.length };
+    return {
+      ready,
+      processing,
+      error,
+      totalSize,
+      totalPages,
+      total: docs.length,
+    };
   }, [currentDocuments]);
 
   // Handle document selection — get a signed URL from the backend (cached)
   const handleDocumentSelect = useCallback(
     async (doc: Document) => {
-      // Already viewing this document — do nothing
       if (selectedDocumentId === doc.id) return;
 
       setSelectedDocumentId(doc.id);
 
-      // Use cached URL if available
       const cached = signedUrlCache.current.get(doc.id);
       if (cached) {
         setSelectedFileUrl(cached);
         return;
       }
 
-      setSelectedFileUrl(null); // show loading state while fetching
+      setSelectedFileUrl(null);
 
       try {
         const { signed_url } = await apiGet<{ signed_url: string }>(
-          `/files/${doc.id}/signed-url`
+          `/files/${doc.id}/signed-url`,
         );
         signedUrlCache.current.set(doc.id, signed_url);
         setSelectedFileUrl(signed_url);
@@ -200,12 +270,36 @@ export default function DocumentsPage() {
         console.error("Failed to get signed URL:", err);
       }
     },
-    [selectedDocumentId]
+    [selectedDocumentId],
   );
 
-  // Handle highlight clicks - in a real app, this could show details, copy text, etc.
+  // Remove a document from local state after deletion
+  const handleDocumentDeleted = useCallback(
+    (documentId: string) => {
+      setDocuments((prev) => prev.filter((d) => d.id !== documentId));
+      if (selectedDocumentId === documentId) {
+        setSelectedDocumentId(null);
+        setSelectedFileUrl(null);
+      }
+    },
+    [selectedDocumentId],
+  );
+
+  // Update a document in local state (e.g. after toggling global or changing tags)
+  const handleDocumentUpdated = useCallback((updated: Document) => {
+    setDocuments((prev) =>
+      prev.map((d) => (d.id === updated.id ? updated : d)),
+    );
+  }, []);
+
+  // Handle highlight clicks
   const handleHighlightClick = (highlight: PdfHighlight) => {
-    console.log("Highlight clicked:", highlight.label, "on page", highlight.pageNumber);
+    console.log(
+      "Highlight clicked:",
+      highlight.label,
+      "on page",
+      highlight.pageNumber,
+    );
   };
 
   if (isInitialLoad) {
@@ -268,7 +362,9 @@ export default function DocumentsPage() {
                   onClick={() => setUploadDialogOpen(true)}
                 >
                   <IconUpload className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
-                  {activeTab === "library" ? "Upload PDF" : "Add Global Document"}
+                  {activeTab === "library"
+                    ? "Upload PDF"
+                    : "Add Global Document"}
                 </Button>
               </div>
 
@@ -285,14 +381,20 @@ export default function DocumentsPage() {
                   <TabsTrigger value="library" className="gap-2">
                     <IconLibrary className="h-4 w-4" />
                     My Library
-                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="ml-1 h-5 px-1.5 text-xs"
+                    >
                       {libraryDocuments.length}
                     </Badge>
                   </TabsTrigger>
                   <TabsTrigger value="global" className="gap-2">
                     <IconWorld className="h-4 w-4" />
                     Global Docs
-                    <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="ml-1 h-5 px-1.5 text-xs"
+                    >
                       {globalDocuments.length}
                     </Badge>
                   </TabsTrigger>
@@ -402,14 +504,21 @@ export default function DocumentsPage() {
                         </Button>
                       </div>
                     ) : (
-                      <EmptyState onUploadClick={() => setUploadDialogOpen(true)} />
+                      <EmptyState
+                        onUploadClick={() => setUploadDialogOpen(true)}
+                      />
                     )
                   ) : (
                     filteredDocuments.map((doc) => (
                       <DocumentRow
                         key={doc.id}
                         document={doc}
+                        allTags={userTags}
                         onClick={() => handleDocumentSelect(doc)}
+                        onDeleted={handleDocumentDeleted}
+                        onUpdated={handleDocumentUpdated}
+                        onTagCreated={handleTagCreated}
+                        onTagDeleted={handleTagDeleted}
                       />
                     ))
                   )}

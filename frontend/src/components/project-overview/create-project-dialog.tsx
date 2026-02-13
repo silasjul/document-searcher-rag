@@ -396,7 +396,7 @@ function StepDocuments({
     const search = searchTerm.toLowerCase();
     return (
       doc.original_name.toLowerCase().includes(search) ||
-      doc.tags.some((tag) => tag.toLowerCase().includes(search))
+      doc.tags.some((tag) => tag.name.toLowerCase().includes(search))
     );
   });
 
@@ -598,10 +598,10 @@ function DocumentSelectionRow({
           <div className="mt-2 flex flex-wrap gap-1">
             {document.tags.map((tag) => (
               <span
-                key={tag}
+                key={tag.id}
                 className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
               >
-                {tag}
+                {tag.name}
               </span>
             ))}
           </div>

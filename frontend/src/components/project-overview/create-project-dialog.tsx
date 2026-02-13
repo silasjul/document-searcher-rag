@@ -36,6 +36,7 @@ import {
   FileUploadZone,
   type UploadedFile,
 } from "@/components/documents/file-upload-zone";
+import { useFileUpload } from "@/hooks/use-file-upload";
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -55,6 +56,7 @@ export function CreateProjectDialog({
   existingDocumentIds = [],
 }: CreateProjectDialogProps) {
   const router = useRouter();
+  const { uploadFiles, isUploading } = useFileUpload();
   const isAddDocumentsMode = !!projectId;
   const [step, setStep] = useState<Step>(
     isAddDocumentsMode ? "documents" : "info"
@@ -125,18 +127,17 @@ export function CreateProjectDialog({
 
       setIsCreating(true);
       try {
-        // In a real app, we would:
-        // 1. Upload the new files first
-        // 2. Add all document IDs (both existing and new) to the project
-        // For now, we simulate this with the mock data
-
-        // Simulate uploading new files (would add them to library in real app)
+        // Upload new files via the signed upload flow
         if (uploadedFiles.length > 0) {
           toast.info(
             `Uploading ${uploadedFiles.length} file(s) to your library...`
           );
-          // Simulate upload delay
-          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          await uploadFiles(uploadedFiles, (fileId, status) => {
+            setUploadedFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, status } : f))
+            );
+          });
         }
 
         await addDocumentsToProject(
@@ -148,7 +149,7 @@ export function CreateProjectDialog({
           } to project`
         );
         handleClose(false);
-        router.refresh(); // Refresh to show new documents
+        router.refresh();
       } catch (error) {
         toast.error("Failed to add documents");
         console.error(error);
@@ -164,18 +165,17 @@ export function CreateProjectDialog({
 
       setIsCreating(true);
       try {
-        // In a real app, we would:
-        // 1. Upload the new files first
-        // 2. Create the project with all document IDs
-        // For now, we simulate this with the mock data
-
-        // Simulate uploading new files (would add them to library in real app)
+        // Upload new files via the signed upload flow
         if (uploadedFiles.length > 0) {
           toast.info(
             `Uploading ${uploadedFiles.length} file(s) to your library...`
           );
-          // Simulate upload delay
-          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          await uploadFiles(uploadedFiles, (fileId, status) => {
+            setUploadedFiles((prev) =>
+              prev.map((f) => (f.id === fileId ? { ...f, status } : f))
+            );
+          });
         }
 
         const newProjectId = await createProject({

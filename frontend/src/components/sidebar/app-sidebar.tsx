@@ -38,7 +38,7 @@ export function AppSidebar({
                 className="flex min-w-0 items-center gap-4"
               >
                 <Image
-                  src="/logo.png"
+                  src="/layers.png"
                   alt="Logo"
                   width={32}
                   height={32}

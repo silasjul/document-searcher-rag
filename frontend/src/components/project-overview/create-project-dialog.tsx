@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Document } from "@/lib/types";
 import { DocumentStatusBadge } from "@/components/documents/document-status-badge";
+import { TagBadge } from "@/components/documents/tag-badge";
 import { formatFileSize, cn } from "@/lib/utils";
 import {
   createProject,
@@ -594,15 +595,10 @@ function DocumentSelectionRow({
           <DocumentStatusBadge status={document.status} />
         </div>
 
-        {document.tags.length > 0 && (
+        {document.tags?.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {document.tags.map((tag) => (
-              <span
-                key={tag.id}
-                className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-              >
-                {tag.name}
-              </span>
+              <TagBadge key={tag.id} tag={tag} />
             ))}
           </div>
         )}

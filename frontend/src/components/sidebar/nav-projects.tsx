@@ -55,6 +55,8 @@ export function NavProjects() {
   const params = useParams();
   const activeProjectId = params.projectId as string;
 
+  if (projects.length === 0) return null;
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
@@ -81,7 +83,7 @@ export function NavProjects() {
           visibleItems.map((p) => (
             <SidebarMenuItem key={p.id}>
               {renamingProjectId === p.id ? (
-                <div className="flex items-center gap-2 w-full h-8 px-2 rounded-md">
+                <div className="flex items-center gap-2 w-full h-8 pl-2 rounded-md">
                   <IconFile className="size-4 shrink-0" />
                   <ProjectNameInput
                     projectId={p.id}
@@ -93,7 +95,7 @@ export function NavProjects() {
                     className={cn(
                       "h-6 w-full text-sm font-normal min-w-0",
                       activeProjectId === p.id &&
-                        "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     )}
                     autoFocus
                   />
@@ -118,7 +120,7 @@ export function NavProjects() {
                     </SidebarMenuAction>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-24 rounded-lg"
+                    className="w-24 rounded-lg data-[state=closed]:animate-none!"
                     side={isMobile ? "bottom" : "right"}
                     align={isMobile ? "end" : "start"}
                   >
@@ -133,10 +135,6 @@ export function NavProjects() {
                       <span>Rename</span>
                     </DropdownMenuItem>
 
-                    <DropdownMenuItem>
-                      <IconShare3 />
-                      <span>Share</span>
-                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem variant="destructive">
                       <IconTrash />

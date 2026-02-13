@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Project, ChatSession, Document } from "@/lib/types";
+import { Project, ChatSession, Document, Tag } from "@/lib/types";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +39,7 @@ export function ProjectOverview({
   const [isAddDocumentsOpen, setIsAddDocumentsOpen] = useState(false);
   const [allDocuments, setAllDocuments] = useState<Document[]>([]);
 
-  // Fetch all user documents when the add-documents dialog opens
+  // Fetch all user documents (with tags) when the add-documents dialog opens
   useEffect(() => {
     if (!isAddDocumentsOpen) return;
 
@@ -47,9 +47,23 @@ export function ProjectOverview({
       const supabase = createClient();
       const { data } = await supabase
         .from("files")
-        .select("*")
+        .select("*, file_tags(tag_id, tags(*))")
         .order("created_at", { ascending: false });
-      setAllDocuments(data ?? []);
+
+      const parsed = (data ?? []).map((d) => {
+        const raw = d as unknown as Record<string, unknown>;
+        const fileTags = (raw.file_tags ?? []) as Array<{
+          tag_id: string;
+          tags: Tag | null;
+        }>;
+        const tags: Tag[] = fileTags
+          .map((ft) => ft.tags)
+          .filter((t): t is Tag => t !== null);
+        const { file_tags: _unused, ...rest } = raw;
+        return { ...rest, tags } as Document;
+      });
+
+      setAllDocuments(parsed);
     }
     fetchDocs();
   }, [isAddDocumentsOpen]);

@@ -45,6 +45,7 @@ export function useFileUpload() {
     async (
       files: UploadedFile[],
       onProgress?: (fileId: string, status: UploadedFile["status"]) => void,
+      isGlobal?: boolean,
     ): Promise<string[]> => {
       setIsUploading(true);
       setError(null);
@@ -59,6 +60,7 @@ export function useFileUpload() {
               size: f.size,
               mime_type: f.file.type || "application/pdf",
             })),
+            is_global: isGlobal ?? false,
           },
         );
 

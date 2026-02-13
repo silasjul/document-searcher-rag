@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +11,7 @@ interface StatCardProps {
   isActive?: boolean;
 }
 
-export function StatCard({
+export const StatCard = memo(function StatCard({
   icon: Icon,
   label,
   value,
@@ -42,4 +43,4 @@ export function StatCard({
       </div>
     </motion.div>
   );
-}
+});

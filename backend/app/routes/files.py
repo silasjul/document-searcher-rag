@@ -29,6 +29,7 @@ class FileEntry(BaseModel):
 
 class InitiateUploadRequest(BaseModel):
     files: list[FileEntry]
+    is_global: bool = False
 
 
 class SignedUploadTarget(BaseModel):
@@ -88,6 +89,7 @@ async def initiate_upload(
             "file_size": f.size,
             "mime_type": f.mime_type,
             "status": "pending_upload",
+            "is_global": body.is_global,
         }
         for f in body.files
     ]

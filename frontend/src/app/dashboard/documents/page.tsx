@@ -23,12 +23,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Document } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
 import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
 import { EmptyState } from "@/components/documents/empty-state";
+import { UploadDialog } from "@/components/documents/upload-dialog";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
 import {
   SAMPLE_HIGHLIGHTS,
@@ -47,29 +48,60 @@ export default function DocumentsPage() {
   );
   const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
   // Cache signed URLs for the lifetime of the page (URLs are valid for 1 hour)
   const signedUrlCache = useRef<Map<string, string>>(new Map());
 
-  // Fetch documents from Supabase
+  // Fetch only specific documents by ID and merge them into state
+  const addUploadedDocuments = useCallback(async (fileIds: string[]) => {
+    if (fileIds.length === 0) return;
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("files")
+      .select("*")
+      .in("id", fileIds);
+
+    if (error) {
+      console.error("Failed to fetch uploaded documents:", error.message);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      setDocuments((prev) => {
+        // Filter out any existing docs with the same IDs (shouldn't happen, but safe)
+        const existingIds = new Set(data.map((d) => d.id));
+        const filtered = prev.filter((d) => !existingIds.has(d.id));
+        // Prepend new documents (they're newest)
+        return [...data, ...filtered];
+      });
+    }
+  }, []);
+
+  // Fetch all documents from Supabase on initial mount
   useEffect(() => {
-    async function fetchDocuments() {
-      setIsLoading(true);
+    let cancelled = false;
+
+    async function loadDocuments() {
       const supabase = createClient();
       const { data, error } = await supabase
         .from("files")
         .select("*")
         .order("created_at", { ascending: false });
 
+      if (cancelled) return;
+
       if (error) {
         console.error("Failed to fetch documents:", error.message);
       } else {
         setDocuments(data ?? []);
       }
-      setIsLoading(false);
+      setIsInitialLoad(false);
     }
-    fetchDocuments();
+
+    loadDocuments();
+    return () => { cancelled = true; };
   }, []);
 
   // Separate documents into library and global
@@ -176,7 +208,7 @@ export default function DocumentsPage() {
     console.log("Highlight clicked:", highlight.label, "on page", highlight.pageNumber);
   };
 
-  if (isLoading) {
+  if (isInitialLoad) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-muted-foreground">Loading documents...</p>
@@ -230,7 +262,11 @@ export default function DocumentsPage() {
                   </p>
                 </div>
 
-                <Button size="lg" className="group gap-2 font-semibold">
+                <Button
+                  size="lg"
+                  className="group gap-2 font-semibold"
+                  onClick={() => setUploadDialogOpen(true)}
+                >
                   <IconUpload className="h-5 w-5 transition-transform group-hover:-translate-y-0.5" />
                   {activeTab === "library" ? "Upload PDF" : "Add Global Document"}
                 </Button>
@@ -366,7 +402,7 @@ export default function DocumentsPage() {
                         </Button>
                       </div>
                     ) : (
-                      <EmptyState />
+                      <EmptyState onUploadClick={() => setUploadDialogOpen(true)} />
                     )
                   ) : (
                     filteredDocuments.map((doc) => (
@@ -383,6 +419,14 @@ export default function DocumentsPage() {
           </div>
         </div>
       </SplitViewLayout>
+
+      <UploadDialog
+        open={uploadDialogOpen}
+        onOpenChange={setUploadDialogOpen}
+        isGlobal={activeTab === "global"}
+        existingFileNames={documents.map((d) => d.original_name)}
+        onUploadComplete={addUploadedDocuments}
+      />
     </div>
   );
 }

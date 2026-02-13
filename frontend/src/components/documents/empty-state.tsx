@@ -2,7 +2,11 @@ import { motion } from "framer-motion";
 import { IconFileTypePdf, IconUpload } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 
-export function EmptyState() {
+interface EmptyStateProps {
+  onUploadClick?: () => void;
+}
+
+export function EmptyState({ onUploadClick }: EmptyStateProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -19,7 +23,7 @@ export function EmptyState() {
         Upload PDF files to your document library. You can then use them to
         provide context for AI conversations in your projects.
       </p>
-      <Button className="mt-6 gap-2">
+      <Button className="mt-6 gap-2" onClick={onUploadClick}>
         <IconUpload className="h-4 w-4" />
         Upload your first PDF
       </Button>

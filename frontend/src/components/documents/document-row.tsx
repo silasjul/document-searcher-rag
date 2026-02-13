@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   IconFileTypePdf,
   IconDownload,
@@ -19,7 +20,7 @@ import { formatFileSize } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { DocumentStatusBadge } from "./document-status-badge";
 
-export function DocumentRow({
+export const DocumentRow = memo(function DocumentRow({
   document,
   onClick,
 }: {
@@ -100,4 +101,4 @@ export function DocumentRow({
       </div>
     </div>
   );
-}
+});

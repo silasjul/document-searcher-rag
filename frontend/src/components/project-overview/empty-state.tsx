@@ -18,31 +18,55 @@ export function EmptyState({ projectId }: { projectId: string }) {
       </div>
 
       <div className="flex flex-col items-center rounded-3xl border border-border/50 bg-card/50 px-8 py-20 text-center">
-        {/* Animated icon container */}
+        {/* Animated icon container — float + pulse */}
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{
+            scale: 1,
+            opacity: 1,
+            y: [0, -4, 0],
+          }}
           transition={{
-            type: "spring" as const,
-            stiffness: 200,
-            damping: 15,
-            delay: 0.2,
+            scale: {
+              type: "spring" as const,
+              stiffness: 200,
+              damping: 15,
+              delay: 0.2,
+            },
+            opacity: { duration: 0.4, delay: 0.2 },
+            y: {
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.7,
+            },
           }}
           className="relative mb-8"
         >
-          {/* Pulsing rings */}
-          <div
-            className="absolute inset-0 rounded-3xl bg-primary/20"
-            style={{
-              animation: "ping-slow 2s infinite",
-              animationDelay: "150ms",
+          {/* Slow pulsing glow behind the icon */}
+          <motion.div
+            className="absolute -inset-3 rounded-[28px] bg-primary/8 blur-xl"
+            animate={{
+              opacity: [0.25, 0.5, 0.25],
+              scale: [0.95, 1.05, 0.95],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
             }}
           />
-          <div
-            className="absolute inset-0 rounded-3xl bg-primary/10"
-            style={{
-              animation: "ping-slow 2s infinite",
-              animationDelay: "300ms",
+          <motion.div
+            className="absolute -inset-1.5 rounded-[26px] bg-linear-to-br from-primary/10 to-violet-500/10"
+            animate={{
+              opacity: [0.3, 0.6, 0.3],
+              scale: [1, 1.03, 1],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.5,
             }}
           />
 

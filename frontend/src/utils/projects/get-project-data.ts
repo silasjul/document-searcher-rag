@@ -12,7 +12,7 @@ export const getProject = cache(
       .from("projects")
       .select("*")
       .eq("id", projectId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Failed to fetch project:", error.message);

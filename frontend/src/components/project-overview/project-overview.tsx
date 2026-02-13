@@ -15,6 +15,11 @@ import {
   IconUpload,
   IconFileTypePdf,
 } from "@tabler/icons-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { formatDistanceToNow } from "date-fns";
 import { StatCard } from "./stat-card";
 import { DocumentCard } from "./document-card";
@@ -79,6 +84,7 @@ export function ProjectOverview({
 
   const latestChat = sortedChats[0];
   const readyDocuments = documents.filter((d) => d.status === "completed").length;
+  const hasReadyDocuments = readyDocuments > 0;
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -121,12 +127,31 @@ export function ProjectOverview({
                 </p>
               </div>
 
-              <Button size="lg" className="group gap-2 font-semibold" asChild>
-                <Link href={`/dashboard/project/${projectData.id}?chatid=new`}>
-                  <IconPlus className="h-5 w-5 transition-transform group-hover:rotate-90" />
-                  New conversation
-                </Link>
-              </Button>
+              {hasReadyDocuments ? (
+                <Button size="lg" className="group gap-2 font-semibold" asChild>
+                  <Link href={`/dashboard/project/${projectData.id}?chatid=new`}>
+                    <IconPlus className="h-5 w-5 transition-transform group-hover:rotate-90" />
+                    New conversation
+                  </Link>
+                </Button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex">
+                      <Button size="lg" className="gap-2 font-semibold" disabled>
+                        <IconPlus className="h-5 w-5" />
+                        New conversation
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <div className="flex items-center gap-1.5">
+                      <IconFileText className="h-3.5 w-3.5" />
+                      Add documents and wait for them to be ready
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
 
             {/* Stats Grid */}
@@ -150,33 +175,35 @@ export function ProjectOverview({
               />
             </div>
 
-            {/* Conversations Grid */}
-            <div id="conversations" className="scroll-mt-24">
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold text-foreground">
-                  Recent Conversations
-                </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Continue where you left off or start something new
-                </p>
-              </div>
-
-              {chats.length > 0 ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {sortedChats.map((chat, index) => (
-                    <div key={chat.id}>
-                      <ConversationCard
-                        chat={chat}
-                        projectId={projectData.id}
-                        index={index}
-                      />
-                    </div>
-                  ))}
+            {/* Conversations Grid — hidden when no documents are ready */}
+            {hasReadyDocuments && (
+              <div id="conversations" className="scroll-mt-24">
+                <div className="mb-6">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Recent Conversations
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Continue where you left off or start something new
+                  </p>
                 </div>
-              ) : (
-                <EmptyState projectId={projectData.id} />
-              )}
-            </div>
+
+                {chats.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {sortedChats.map((chat, index) => (
+                      <div key={chat.id}>
+                        <ConversationCard
+                          chat={chat}
+                          projectId={projectData.id}
+                          index={index}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <EmptyState projectId={projectData.id} />
+                )}
+              </div>
+            )}
 
             {/* Documents Section */}
             <div id="documents" className="scroll-mt-24">
@@ -249,14 +276,33 @@ export function ProjectOverview({
                     contracts&quot;.
                   </p>
                 </div>
-                <Button variant="outline" className="gap-2 shrink-0" asChild>
-                  <Link
-                    href={`/dashboard/project/${projectData.id}?chatid=new`}
-                  >
-                    <IconMessage className="h-4 w-4" />
-                    Ask AI
-                  </Link>
-                </Button>
+                {hasReadyDocuments ? (
+                  <Button variant="outline" className="gap-2 shrink-0" asChild>
+                    <Link
+                      href={`/dashboard/project/${projectData.id}?chatid=new`}
+                    >
+                      <IconMessage className="h-4 w-4" />
+                      Ask AI
+                    </Link>
+                  </Button>
+                ) : (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex shrink-0">
+                        <Button variant="outline" className="gap-2" disabled>
+                          <IconMessage className="h-4 w-4" />
+                          Ask AI
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="flex items-center gap-1.5">
+                        <IconFileText className="h-3.5 w-3.5" />
+                        Add documents and wait for them to be ready
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             </div>
           </div>

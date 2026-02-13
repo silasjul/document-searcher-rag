@@ -18,13 +18,12 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import Link from "next/link"
-import { login } from "@/lib/supabase/actions"
+import { updatePassword } from "@/lib/supabase/actions"
 import { toast } from "sonner"
 
-type FieldKey = "email" | "password" | "general"
+type FieldKey = "password" | "general"
 
-export function LoginForm({
+export function ResetPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
@@ -37,7 +36,7 @@ export function LoginForm({
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    const result = await login(formData)
+    const result = await updatePassword(formData)
 
     if (result?.error) {
       if (result.field === "general") {
@@ -54,50 +53,47 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6 shadow-2xl", className)} {...props}>
       <Card>
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">Set new password</CardTitle>
           <CardDescription>
-            Login with your email and password
+            Enter your new password below
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
-              <Field data-invalid={!!(errors.email || errors.general) || undefined}>
-                <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Field data-invalid={!!(errors.password || errors.general) || undefined}>
+                <FieldLabel htmlFor="password">New Password</FieldLabel>
                 <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="email@example.com"
+                  id="password"
+                  name="password"
+                  type="password"
+                  placeholder="********"
                   required
-                  aria-invalid={!!(errors.email || errors.general) || undefined}
+                  aria-invalid={!!(errors.password || errors.general) || undefined}
                 />
-                {errors.email && (
-                  <FieldError>{errors.email}</FieldError>
-                )}
               </Field>
               <Field data-invalid={!!(errors.password || errors.general) || undefined}>
-                <div className="flex items-center">
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Link
-                    href="/forgot-password"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </Link>
-                </div>
-                <Input id="password" name="password" type="password" placeholder="********" required aria-invalid={!!(errors.password || errors.general) || undefined} />
-                {errors.password && (
+                <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
+                <Input
+                  id="confirm-password"
+                  name="confirm-password"
+                  type="password"
+                  placeholder="********"
+                  required
+                  aria-invalid={!!(errors.password || errors.general) || undefined}
+                />
+                {errors.password ? (
                   <FieldError>{errors.password}</FieldError>
+                ) : (
+                  <FieldDescription>
+                    Must be at least 8 characters long.
+                  </FieldDescription>
                 )}
               </Field>
               <Field>
                 <Button type="submit" disabled={loading}>
-                  {loading ? "Logging in..." : "Login"}
+                  {loading ? "Updating password..." : "Update password"}
                 </Button>
-                <FieldDescription className="text-center">
-                  Don&apos;t have an account? <Link href="/signup">Sign up</Link>
-                </FieldDescription>
               </Field>
             </FieldGroup>
           </form>

@@ -536,6 +536,7 @@ export default function DocumentsPage() {
                     ) : (
                       <EmptyState
                         onUploadClick={() => setUploadDialogOpen(true)}
+                        variant={activeTab}
                       />
                     )
                   ) : (

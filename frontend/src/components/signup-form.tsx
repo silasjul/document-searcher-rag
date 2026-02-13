@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { signup } from "@/lib/supabase/actions"
+import { toast } from "sonner"
 
 type FieldKey = "secret" | "email" | "password" | "general"
 
@@ -40,14 +41,18 @@ export function SignupForm({
     const result = await signup(formData)
 
     if (result?.error) {
-      setErrors({ [result.field]: result.error })
+      if (result.field === "general") {
+        toast.error(result.error)
+      } else {
+        setErrors({ [result.field]: result.error })
+      }
       setLoading(false)
     }
   }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
+      <Card className="shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Create your account</CardTitle>
           <CardDescription>
@@ -57,9 +62,6 @@ export function SignupForm({
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
-              {errors.general && (
-                <FieldError>{errors.general}</FieldError>
-              )}
               <Field data-invalid={!!errors.secret || undefined}>
                 <FieldLabel htmlFor="secret">Signup Secret</FieldLabel>
                 <Input
@@ -88,7 +90,7 @@ export function SignupForm({
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="email@example.com"
                   required
                 />
                 {errors.email && (
@@ -99,13 +101,13 @@ export function SignupForm({
                 <Field className="grid grid-cols-2 gap-4">
                   <Field>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
-                    <Input id="password" name="password" type="password" required />
+                    <Input id="password" name="password" type="password" placeholder="****" required />
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="confirm-password">
                       Confirm Password
                     </FieldLabel>
-                    <Input id="confirm-password" name="confirm-password" type="password" required />
+                    <Input id="confirm-password" name="confirm-password" type="password" placeholder="****" required />
                   </Field>
                 </Field>
                 {errors.password ? (
@@ -128,8 +130,8 @@ export function SignupForm({
           </form>
         </CardContent>
       </Card>
-      <FieldDescription className="px-6 text-center">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+      <FieldDescription className="px-6 text-center text-black/80">
+        By clicking &quot;Create Account&quot;, you agree to our <a href="#">Terms of Service</a>{" "}
         and <a href="#">Privacy Policy</a>.
       </FieldDescription>
     </div>

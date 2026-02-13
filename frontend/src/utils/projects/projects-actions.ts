@@ -74,6 +74,23 @@ export async function createProject(data: {
   return project.id;
 }
 
+export async function deleteProject(projectId: string) {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("projects")
+    .delete()
+    .eq("id", projectId);
+
+  if (error) {
+    console.error("Failed to delete project:", error.message);
+    throw new Error("Failed to delete project");
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/project/${projectId}`);
+}
+
 export async function addDocumentsToProject(
   projectId: string,
   documentIds: string[],

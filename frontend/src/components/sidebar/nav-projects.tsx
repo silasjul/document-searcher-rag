@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   IconChevronDown,
@@ -12,9 +13,9 @@ import {
   IconFile,
   IconFolder,
   IconSearch,
-  IconShare3,
   IconTrash,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 
 import {
   DropdownMenu,
@@ -33,10 +34,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useParams } from "next/navigation";
 import { ProjectNameInput } from "@/components/project-overview/project-name-input";
 import { cn } from "@/lib/utils";
 import { useProjects } from "@/components/project-overview/projects-provider";
+import { deleteProject } from "@/utils/projects/projects-actions";
 
 export function NavProjects() {
   const { projects, updateProjectNameOptimistic } = useProjects();
@@ -44,6 +45,7 @@ export function NavProjects() {
   const [renamingProjectId, setRenamingProjectId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const { isMobile } = useSidebar();
+  const router = useRouter();
 
   const normalizedSearch = searchTerm.toLowerCase().trim();
   const filteredItems = normalizedSearch
@@ -54,6 +56,20 @@ export function NavProjects() {
 
   const params = useParams();
   const activeProjectId = params.projectId as string;
+
+  const handleDeleteProject = (projectId: string) => {
+    // Navigate away immediately if we're on the project being deleted
+    // to avoid the page trying to re-fetch a deleted project
+    if (activeProjectId === projectId) {
+      router.push("/dashboard");
+    }
+
+    toast.promise(deleteProject(projectId), {
+      loading: "Deleting project...",
+      success: "Project deleted successfully",
+      error: "Failed to delete project. Please try again.",
+    });
+  };
 
   if (projects.length === 0) return null;
 
@@ -136,7 +152,10 @@ export function NavProjects() {
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => handleDeleteProject(p.id)}
+                    >
                       <IconTrash />
                       <span>Delete</span>
                     </DropdownMenuItem>

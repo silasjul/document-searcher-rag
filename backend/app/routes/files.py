@@ -50,6 +50,10 @@ class ConfirmUploadResponse(BaseModel):
     confirmed: list[str]
 
 
+class SignedUrlResponse(BaseModel):
+    signed_url: str
+
+
 # ── Routes ───────────────────────────────────────────────────────────────────
 
 
@@ -81,6 +85,8 @@ async def initiate_upload(
             "user_id": user_id,
             "original_name": f.name,
             "storage_path": "__pending__",
+            "file_size": f.size,
+            "mime_type": f.mime_type,
             "status": "pending_upload",
         }
         for f in body.files
@@ -150,3 +156,53 @@ async def confirm_upload(
 
     confirmed_ids = [row["id"] for row in (result.data or [])]
     return ConfirmUploadResponse(confirmed=confirmed_ids)
+
+
+@router.get("/{file_id}/signed-url", response_model=SignedUrlResponse)
+async def get_signed_url(
+    file_id: str,
+    user_id: str = Depends(get_current_user_id),
+):
+    """
+    Generate a short-lived signed URL for viewing/downloading a file.
+    Uses the service-role client so RLS on storage doesn't block reads.
+    """
+    settings = get_settings()
+    supabase = get_supabase()
+
+    # Look up the file, ensuring it belongs to the requesting user
+    result = (
+        supabase.table("files")
+        .select("storage_path")
+        .eq("id", file_id)
+        .eq("user_id", user_id)
+        .maybe_single()
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not found",
+        )
+
+    storage_path = result.data["storage_path"]
+
+    try:
+        signed = supabase.storage.from_(
+            settings.supabase_storage_bucket
+        ).create_signed_url(storage_path, 3600)  # 1 hour
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Storage error: {exc}",
+        )
+
+    signed_url = signed.get("signedURL") or signed.get("signedUrl")
+    if not signed_url:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to generate signed URL",
+        )
+
+    return SignedUrlResponse(signed_url=signed_url)

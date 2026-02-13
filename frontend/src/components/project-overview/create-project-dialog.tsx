@@ -22,7 +22,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MOCK_DOCUMENTS, type Document } from "@/lib/mock-data";
+import type { Document } from "@/lib/types";
 import { DocumentStatusBadge } from "@/components/documents/document-status-badge";
 import { formatFileSize, cn } from "@/lib/utils";
 import {
@@ -41,6 +41,7 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 interface CreateProjectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  allDocuments: Document[]; // All user documents (fetched from DB)
   projectId?: string; // If provided, dialog opens in "add documents" mode for existing project
   projectName?: string; // Name of the existing project (for display)
   existingDocumentIds?: string[]; // Document IDs already in the project (to filter out)
@@ -51,6 +52,7 @@ type Step = "info" | "documents";
 export function CreateProjectDialog({
   open,
   onOpenChange,
+  allDocuments,
   projectId,
   projectName: existingProjectName,
   existingDocumentIds = [],
@@ -74,8 +76,8 @@ export function CreateProjectDialog({
 
   // Get existing document names for duplicate detection
   const existingDocumentNames = useMemo(() => {
-    return MOCK_DOCUMENTS.map((doc) => doc.name);
-  }, []);
+    return allDocuments.map((doc) => doc.original_name);
+  }, [allDocuments]);
 
   const handleReset = () => {
     setStep(isAddDocumentsMode ? "documents" : "info");
@@ -201,9 +203,9 @@ export function CreateProjectDialog({
   const canProceed =
     step === "info" ? projectName.trim() && description.trim() : true; // Can create project without documents
 
-  // Get available documents (only ready ones, and exclude already added documents in add mode)
-  const availableDocuments = MOCK_DOCUMENTS.filter((doc) => {
-    if (doc.status !== "ready") return false;
+  // Get available documents (only ready/uploaded ones, and exclude already added documents in add mode)
+  const availableDocuments = allDocuments.filter((doc) => {
+    if (doc.status !== "completed" && doc.status !== "uploaded") return false;
     if (isAddDocumentsMode && existingDocumentIds.includes(doc.id))
       return false;
     return true;
@@ -257,6 +259,7 @@ export function CreateProjectDialog({
               existingDocumentNames={existingDocumentNames}
               documentTab={documentTab}
               setDocumentTab={setDocumentTab}
+              totalDocumentCount={allDocuments.length}
             />
           )}
         </div>
@@ -365,6 +368,7 @@ interface StepDocumentsProps {
   existingDocumentNames: string[];
   documentTab: "upload" | "library";
   setDocumentTab: (tab: "upload" | "library") => void;
+  totalDocumentCount: number;
 }
 
 function StepDocuments({
@@ -377,6 +381,7 @@ function StepDocuments({
   existingDocumentNames,
   documentTab,
   setDocumentTab,
+  totalDocumentCount,
 }: StepDocumentsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const totalSelected = selectedDocumentIds.size + uploadedFiles.length;
@@ -390,7 +395,7 @@ function StepDocuments({
     if (!searchTerm.trim()) return true;
     const search = searchTerm.toLowerCase();
     return (
-      doc.name.toLowerCase().includes(search) ||
+      doc.original_name.toLowerCase().includes(search) ||
       doc.tags.some((tag) => tag.toLowerCase().includes(search))
     );
   });
@@ -481,7 +486,7 @@ function StepDocuments({
                     No documents available
                   </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {MOCK_DOCUMENTS.length === 0
+                    {totalDocumentCount === 0
                       ? "Upload documents first to add them to your project"
                       : "All available documents have already been added to this project"}
                   </p>
@@ -579,11 +584,11 @@ function DocumentSelectionRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm truncate">{document.name}</p>
+            <p className="font-medium text-sm truncate">{document.original_name}</p>
             <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-              <span>{formatFileSize(document.fileSize)}</span>
+              <span>{formatFileSize(document.file_size)}</span>
               <span>•</span>
-              <span>{document.pageCount} pages</span>
+              <span>{document.page_count} pages</span>
             </div>
           </div>
           <DocumentStatusBadge status={document.status} />

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChatSession } from "@/lib/mock-data";
+import { ChatSession } from "@/lib/types";
 import { motion } from "framer-motion";
 import { IconMessage, IconClock, IconChevronRight } from "@tabler/icons-react";
 import { formatDistanceToNow, format } from "date-fns";
@@ -13,7 +13,7 @@ export function ConversationCard({
   projectId: string;
   index: number;
 }) {
-  const updatedDate = new Date(chat.updatedAt);
+  const updatedDate = new Date(chat.updated_at);
 
   return (
     <div>

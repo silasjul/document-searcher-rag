@@ -26,6 +26,8 @@ interface SplitViewLayoutProps {
   children: ReactNode;
   selectedDocumentId: string | null;
   onClose: () => void;
+  /** URL to the PDF file to display */
+  fileUrl?: string | null;
   /** Optional highlights to display on the PDF */
   highlights?: PdfHighlight[];
   /** Optional: scroll to this highlight when opening */
@@ -38,6 +40,7 @@ export function SplitViewLayout({
   children,
   selectedDocumentId,
   onClose,
+  fileUrl,
   highlights = [],
   initialHighlightId,
   onHighlightClick,
@@ -59,14 +62,20 @@ export function SplitViewLayout({
       <ResizableHandle withHandle />
       <ResizablePanel defaultSize={50} minSize={30} className="relative">
         <div className="absolute inset-0 overflow-hidden">
-          <PdfViewer
-            ref={viewerRef}
-            fileUrl="/test.pdf"
-            highlights={highlights}
-            initialHighlightId={initialHighlightId}
-            onHighlightClick={onHighlightClick}
-            onClose={onClose}
-          />
+          {fileUrl ? (
+            <PdfViewer
+              ref={viewerRef}
+              fileUrl={fileUrl}
+              highlights={highlights}
+              initialHighlightId={initialHighlightId}
+              onHighlightClick={onHighlightClick}
+              onClose={onClose}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              Loading PDF...
+            </div>
+          )}
         </div>
       </ResizablePanel>
     </ResizablePanelGroup>

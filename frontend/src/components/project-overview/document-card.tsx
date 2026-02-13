@@ -1,4 +1,4 @@
-import { Document } from "@/lib/mock-data";
+import { Document } from "@/lib/types";
 import {
   IconFileTypePdf,
   IconDotsVertical,
@@ -22,7 +22,7 @@ export function DocumentCard({
   document: Document;
   onClick?: () => void;
 }) {
-  const uploadedDate = new Date(document.uploadedAt);
+  const uploadedDate = new Date(document.created_at);
 
   return (
     <div
@@ -38,14 +38,14 @@ export function DocumentCard({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <h4 className="truncate font-medium text-foreground">
-            {document.name}
+            {document.original_name}
           </h4>
           <DocumentStatusBadge status={document.status} />
         </div>
         <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
-          <span>{formatFileSize(document.fileSize)}</span>
+          <span>{formatFileSize(document.file_size)}</span>
           <span>•</span>
-          <span>{document.pageCount} pages</span>
+          <span>{document.page_count} pages</span>
           <span>•</span>
           <span>
             Uploaded {formatDistanceToNow(uploadedDate, { addSuffix: true })}

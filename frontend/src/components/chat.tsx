@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Project } from "@/lib/mock-data";
+import { Project } from "@/lib/types";
 import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Project, ChatSession, Document } from "@/lib/mock-data";
+import { Project, ChatSession, Document } from "@/lib/types";
 import { Chat } from "@/components/chat";
 import { ProjectOverview } from "@/components/project-overview/project-overview";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";

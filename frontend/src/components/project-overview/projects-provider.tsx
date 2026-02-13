@@ -1,6 +1,6 @@
 "use client";
 
-import { Project } from "@/lib/mock-data";
+import { Project } from "@/lib/types";
 import { createContext, useContext, useOptimistic, startTransition } from "react";
 
 interface ProjectsContextType {

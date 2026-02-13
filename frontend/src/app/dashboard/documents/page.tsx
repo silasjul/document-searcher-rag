@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   IconUpload,
   IconSearch,
@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MOCK_DOCUMENTS } from "@/lib/mock-data";
+import type { Document } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
 import { StatCard } from "@/components/documents/stat-card";
 import { DocumentRow } from "@/components/documents/document-row";
@@ -34,6 +34,8 @@ import {
   SAMPLE_HIGHLIGHTS,
   type PdfHighlight,
 } from "@/components/pdf-viewer/types";
+import { createClient } from "@/lib/supabase/client";
+import { apiGet } from "@/lib/api-client";
 
 export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<"library" | "global">("library");
@@ -43,15 +45,41 @@ export default function DocumentsPage() {
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null
   );
+  const [selectedFileUrl, setSelectedFileUrl] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Cache signed URLs for the lifetime of the page (URLs are valid for 1 hour)
+  const signedUrlCache = useRef<Map<string, string>>(new Map());
+
+  // Fetch documents from Supabase
+  useEffect(() => {
+    async function fetchDocuments() {
+      setIsLoading(true);
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("files")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Failed to fetch documents:", error.message);
+      } else {
+        setDocuments(data ?? []);
+      }
+      setIsLoading(false);
+    }
+    fetchDocuments();
+  }, []);
 
   // Separate documents into library and global
   const libraryDocuments = useMemo(
-    () => MOCK_DOCUMENTS.filter((doc) => !doc.isGlobal),
-    []
+    () => documents.filter((doc) => !doc.is_global),
+    [documents]
   );
   const globalDocuments = useMemo(
-    () => MOCK_DOCUMENTS.filter((doc) => doc.isGlobal),
-    []
+    () => documents.filter((doc) => doc.is_global),
+    [documents]
   );
 
   const currentDocuments =
@@ -67,7 +95,7 @@ export default function DocumentsPage() {
     if (normalizedSearch) {
       docs = docs.filter(
         (doc) =>
-          doc.name.toLowerCase().includes(normalizedSearch) ||
+          doc.original_name.toLowerCase().includes(normalizedSearch) ||
           doc.tags.some((tag) => tag.toLowerCase().includes(normalizedSearch))
       );
     }
@@ -82,16 +110,16 @@ export default function DocumentsPage() {
       switch (sortBy) {
         case "newest":
           return (
-            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
         case "oldest":
           return (
-            new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime()
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           );
         case "name":
-          return a.name.localeCompare(b.name);
+          return a.original_name.localeCompare(b.original_name);
         case "size":
-          return b.fileSize - a.fileSize;
+          return b.file_size - a.file_size;
         default:
           return 0;
       }
@@ -102,25 +130,69 @@ export default function DocumentsPage() {
 
   const stats = useMemo(() => {
     const docs = currentDocuments;
-    const ready = docs.filter((d) => d.status === "ready").length;
-    const processing = docs.filter((d) => d.status === "processing").length;
-    const error = docs.filter((d) => d.status === "error").length;
-    const totalSize = docs.reduce((acc, d) => acc + d.fileSize, 0);
-    const totalPages = docs.reduce((acc, d) => acc + d.pageCount, 0);
+    const ready = docs.filter((d) => d.status === "completed").length;
+    const processing = docs.filter(
+      (d) => d.status === "processing" || d.status === "queued"
+    ).length;
+    const error = docs.filter((d) => d.status === "failed").length;
+    const totalSize = docs.reduce((acc, d) => acc + d.file_size, 0);
+    const totalPages = docs.reduce((acc, d) => acc + d.page_count, 0);
 
     return { ready, processing, error, totalSize, totalPages, total: docs.length };
   }, [currentDocuments]);
+
+  // Handle document selection — get a signed URL from the backend (cached)
+  const handleDocumentSelect = useCallback(
+    async (doc: Document) => {
+      // Already viewing this document — do nothing
+      if (selectedDocumentId === doc.id) return;
+
+      setSelectedDocumentId(doc.id);
+
+      // Use cached URL if available
+      const cached = signedUrlCache.current.get(doc.id);
+      if (cached) {
+        setSelectedFileUrl(cached);
+        return;
+      }
+
+      setSelectedFileUrl(null); // show loading state while fetching
+
+      try {
+        const { signed_url } = await apiGet<{ signed_url: string }>(
+          `/files/${doc.id}/signed-url`
+        );
+        signedUrlCache.current.set(doc.id, signed_url);
+        setSelectedFileUrl(signed_url);
+      } catch (err) {
+        console.error("Failed to get signed URL:", err);
+      }
+    },
+    [selectedDocumentId]
+  );
 
   // Handle highlight clicks - in a real app, this could show details, copy text, etc.
   const handleHighlightClick = (highlight: PdfHighlight) => {
     console.log("Highlight clicked:", highlight.label, "on page", highlight.pageNumber);
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-muted-foreground">Loading documents...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden h-full">
       <SplitViewLayout
         selectedDocumentId={selectedDocumentId}
-        onClose={() => setSelectedDocumentId(null)}
+        fileUrl={selectedFileUrl}
+        onClose={() => {
+          setSelectedDocumentId(null);
+          setSelectedFileUrl(null);
+        }}
         highlights={SAMPLE_HIGHLIGHTS}
         onHighlightClick={handleHighlightClick}
       >
@@ -206,8 +278,8 @@ export default function DocumentsPage() {
                   label="Ready"
                   value={stats.ready}
                   subtext={`${stats.totalPages} total pages`}
-                  onClick={() => setStatusFilter("ready")}
-                  isActive={statusFilter === "ready"}
+                  onClick={() => setStatusFilter("completed")}
+                  isActive={statusFilter === "completed"}
                 />
                 <StatCard
                   icon={IconClock}
@@ -220,8 +292,8 @@ export default function DocumentsPage() {
                   icon={IconAlertTriangle}
                   label="Errors"
                   value={stats.error}
-                  onClick={() => setStatusFilter("error")}
-                  isActive={statusFilter === "error"}
+                  onClick={() => setStatusFilter("failed")}
+                  isActive={statusFilter === "failed"}
                 />
               </div>
               <div className="space-y-5">
@@ -248,9 +320,10 @@ export default function DocumentsPage() {
                       </SelectTrigger>
                       <SelectContent position="popper">
                         <SelectItem value="all">All status</SelectItem>
-                        <SelectItem value="ready">Ready</SelectItem>
+                        <SelectItem value="completed">Ready</SelectItem>
+                        <SelectItem value="uploaded">Uploaded</SelectItem>
                         <SelectItem value="processing">Processing</SelectItem>
-                        <SelectItem value="error">Error</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
                       </SelectContent>
                     </Select>
 
@@ -300,7 +373,7 @@ export default function DocumentsPage() {
                       <DocumentRow
                         key={doc.id}
                         document={doc}
-                        onClick={() => setSelectedDocumentId(doc.id)}
+                        onClick={() => handleDocumentSelect(doc)}
                       />
                     ))
                   )}

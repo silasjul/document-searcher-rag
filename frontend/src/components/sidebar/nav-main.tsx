@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IconCirclePlusFilled, IconLibrary, IconHome } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,10 +13,28 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { CreateProjectDialog } from "@/components/project-overview/create-project-dialog";
+import { createClient } from "@/lib/supabase/client";
+import type { Document } from "@/lib/types";
 
 export function NavMain() {
   const pathname = usePathname();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [allDocuments, setAllDocuments] = useState<Document[]>([]);
+
+  // Fetch documents when dialog opens
+  useEffect(() => {
+    if (!isCreateDialogOpen) return;
+
+    async function fetchDocs() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("files")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setAllDocuments(data ?? []);
+    }
+    fetchDocs();
+  }, [isCreateDialogOpen]);
 
   return (
     <>
@@ -64,6 +82,7 @@ export function NavMain() {
       <CreateProjectDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
+        allDocuments={allDocuments}
       />
     </>
   );

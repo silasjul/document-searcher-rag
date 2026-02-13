@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Project, ChatSession, Document } from "@/lib/mock-data";
+import { Project, ChatSession, Document } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -36,18 +37,34 @@ export function ProjectOverview({
   onDocumentClick,
 }: ProjectOverviewProps) {
   const [isAddDocumentsOpen, setIsAddDocumentsOpen] = useState(false);
+  const [allDocuments, setAllDocuments] = useState<Document[]>([]);
+
+  // Fetch all user documents when the add-documents dialog opens
+  useEffect(() => {
+    if (!isAddDocumentsOpen) return;
+
+    async function fetchDocs() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("files")
+        .select("*")
+        .order("created_at", { ascending: false });
+      setAllDocuments(data ?? []);
+    }
+    fetchDocs();
+  }, [isAddDocumentsOpen]);
 
   const sortedChats = [...chats].sort(
-    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
 
   const sortedDocuments = [...documents].sort(
     (a, b) =>
-      new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
   const latestChat = sortedChats[0];
-  const readyDocuments = documents.filter((d) => d.status === "ready").length;
+  const readyDocuments = documents.filter((d) => d.status === "completed").length;
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -82,7 +99,7 @@ export function ProjectOverview({
                     <>
                       {" "}
                       • Last active{" "}
-                      {formatDistanceToNow(new Date(latestChat.updatedAt), {
+                      {formatDistanceToNow(new Date(latestChat.updated_at), {
                         addSuffix: true,
                       })}
                     </>
@@ -236,9 +253,10 @@ export function ProjectOverview({
       <CreateProjectDialog
         open={isAddDocumentsOpen}
         onOpenChange={setIsAddDocumentsOpen}
+        allDocuments={allDocuments}
         projectId={projectData.id}
         projectName={projectData.name}
-        existingDocumentIds={projectData.documentIds}
+        existingDocumentIds={documents.map((d) => d.id)}
       />
     </div>
   );

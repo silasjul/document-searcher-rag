@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Document } from "@/lib/mock-data";
+import { Document } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import { DocumentStatusBadge } from "./document-status-badge";
@@ -40,17 +40,17 @@ export function DocumentRow({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <h3 className="truncate font-medium text-foreground">
-            {document.name}
+            {document.original_name}
           </h3>
           <DocumentStatusBadge status={document.status} className="shrink-0" />
         </div>
         <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
-          <span>{document.pageCount} pages</span>
+          <span>{document.page_count} pages</span>
           <span>•</span>
-          <span>{formatFileSize(document.fileSize)}</span>
+          <span>{formatFileSize(document.file_size)}</span>
           <span>•</span>
           <span>
-            {formatDistanceToNow(new Date(document.uploadedAt), {
+            {formatDistanceToNow(new Date(document.created_at), {
               addSuffix: true,
             })}
           </span>

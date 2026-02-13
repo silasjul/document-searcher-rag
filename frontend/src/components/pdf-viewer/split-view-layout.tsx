@@ -7,6 +7,7 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 import type { PdfHighlight } from "./types";
 import type { PdfViewerRef } from "./pdf-viewer";
 
@@ -14,11 +15,7 @@ const PdfViewer = dynamic(
   () => import("./pdf-viewer").then((mod) => mod.PdfViewer),
   {
     ssr: false,
-    loading: () => (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        Loading PDF Viewer...
-      </div>
-    ),
+    loading: () => null, // Don't show loading state here - let parent handle it
   }
 );
 
@@ -72,8 +69,11 @@ export function SplitViewLayout({
               onClose={onClose}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              Loading PDF...
+            <div className="flex flex-col items-center justify-center h-full gap-3">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground/60">
+                Fetching document...
+              </p>
             </div>
           )}
         </div>

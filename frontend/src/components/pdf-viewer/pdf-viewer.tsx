@@ -203,13 +203,16 @@ const PdfPageWrapper = memo(function PdfPageWrapper({
         onLoadSuccess={onPageLoadSuccess}
         loading={
           <div
-            className="flex items-center justify-center bg-white text-muted-foreground"
+            className="flex flex-col items-center justify-center bg-white gap-3"
             style={{
               width: pageDimensions ? pageDimensions.width * scale : "100%",
               height: pageDimensions ? pageDimensions.height * scale : 800,
             }}
           >
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground/60">
+              Rendering pages...
+            </p>
           </div>
         }
       />
@@ -527,11 +530,14 @@ export const PdfViewer = forwardRef<PdfViewerRef, PdfViewerProps>(
             file={fileUrl}
             onLoadSuccess={onDocumentLoadSuccess}
             loading={
-              <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <div className="flex flex-col items-center justify-center gap-3 min-h-[calc(100vh-10rem)]">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground/60">
+                  Loading pages...
+                </p>
               </div>
             }
-            className="flex flex-col items-center gap-4"
+            className="flex flex-col items-center gap-4 min-h-full"
           >
             {numPages > 0 &&
               Array.from({ length: numPages }, (_, index) => (

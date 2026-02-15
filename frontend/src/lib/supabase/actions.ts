@@ -90,7 +90,11 @@ export async function forgotPassword(formData: FormData) {
   });
 
   if (error) {
-    return { field: "email" as const, error: error.message };
+    const msg = error.message.toLowerCase();
+    if (msg.includes("email")) {
+      return { field: "email" as const, error: error.message };
+    }
+    return { field: "general" as const, error: error.message };
   }
 
   return { success: true };

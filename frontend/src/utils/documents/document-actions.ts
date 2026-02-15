@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import { apiGet } from "@/lib/api-client";
+import { apiGet, apiDelete } from "@/lib/api-client";
 import type { Document, Tag } from "@/lib/types";
 
 // ── Document actions ────────────────────────────────────────────────────────
@@ -28,36 +28,36 @@ export async function downloadDocument(document: Document): Promise<void> {
 }
 
 /**
- * Delete a document from Supabase.
- * Also removes any project_documents junction rows (cascaded by FK or explicit).
+ * Remove a document from a specific project (unlink only).
+ * Does NOT delete the file itself — it stays in the user's library.
  */
-export async function deleteDocument(documentId: string): Promise<void> {
+export async function removeDocumentFromProject(
+  documentId: string,
+  projectId: string,
+): Promise<void> {
   const supabase = createClient();
 
-  // Remove junction rows first
-  const { error: junctionError } = await supabase
+  const { error } = await supabase
     .from("project_documents")
     .delete()
-    .eq("file_id", documentId);
-
-  if (junctionError) {
-    console.error(
-      "Failed to remove project links:",
-      junctionError.message,
-    );
-    throw new Error("Failed to remove project links");
-  }
-
-  // Delete the file record
-  const { error } = await supabase
-    .from("files")
-    .delete()
-    .eq("id", documentId);
+    .eq("file_id", documentId)
+    .eq("project_id", projectId);
 
   if (error) {
-    console.error("Failed to delete document:", error.message);
-    throw new Error("Failed to delete document");
+    console.error("Failed to remove document from project:", error.message);
+    throw new Error("Failed to remove document from project");
   }
+}
+
+/**
+ * Delete a document permanently via the backend API.
+ * The backend (using the service-role key) handles:
+ *   - Removing the file from Supabase Storage
+ *   - Deleting project_documents and file_tags junction rows
+ *   - Deleting the file record itself
+ */
+export async function deleteDocument(documentId: string): Promise<void> {
+  await apiDelete(`/files/${documentId}`);
 }
 
 /**
@@ -156,7 +156,10 @@ export async function addTagToDocument(
 
   const { error } = await supabase
     .from("file_tags")
-    .upsert({ file_id: fileId, tag_id: tagId }, { onConflict: "file_id,tag_id", ignoreDuplicates: true });
+    .upsert(
+      { file_id: fileId, tag_id: tagId },
+      { onConflict: "file_id,tag_id", ignoreDuplicates: true },
+    );
 
   if (error) {
     console.error("Failed to add tag to document:", error.message);

@@ -9,10 +9,15 @@ import {
   IconClock,
   IconAlertTriangle,
   IconFilter,
-  IconSortDescending,
   IconTag,
   IconLibrary,
   IconWorld,
+  IconArrowUp,
+  IconArrowDown,
+  IconArrowsSort,
+  IconDownload,
+  IconTrash,
+  IconWorldOff,
 } from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,17 +32,33 @@ import {
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Document, Tag } from "@/lib/types";
 import { formatFileSize } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
 import { StatCard } from "@/components/documents/stat-card";
-import { DocumentRow } from "@/components/documents/document-row";
+import { DocumentTableRow } from "@/components/documents/document-table-row";
+import { BulkActionBar } from "@/components/documents/bulk-action-bar";
 import { EmptyState } from "@/components/documents/empty-state";
 import { UploadDialog } from "@/components/documents/upload-dialog";
+import { PaginationControls } from "@/components/documents/pagination-controls";
 import { SplitViewLayout } from "@/components/pdf-viewer/split-view-layout";
+import {
+  downloadDocument,
+  deleteDocument,
+  toggleDocumentGlobal,
+} from "@/utils/documents/document-actions";
+import {
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   SAMPLE_HIGHLIGHTS,
   type PdfHighlight,
 } from "@/components/pdf-viewer/types";
 import { createClient } from "@/lib/supabase/client";
 import { apiGet } from "@/lib/api-client";
+import { toast } from "sonner";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -63,7 +84,8 @@ export default function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<"library" | "global">("library");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("newest");
+  const [sortKey, setSortKey] = useState<"name" | "pages" | "size" | "date">("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [tagFilter, setTagFilter] = useState<string>("all");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(
     null,
@@ -73,6 +95,10 @@ export default function DocumentsPage() {
   const [userTags, setUserTags] = useState<Tag[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   // Cache signed URLs for the lifetime of the page (URLs are valid for 1 hour)
   const signedUrlCache = useRef<Map<string, string>>(new Map());
@@ -210,27 +236,39 @@ export default function DocumentsPage() {
     }
 
     // Apply sorting
+    const dir = sortDir === "asc" ? 1 : -1;
     docs.sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return (
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          );
-        case "oldest":
-          return (
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-          );
+      switch (sortKey) {
         case "name":
-          return a.original_name.localeCompare(b.original_name);
+          return dir * a.original_name.localeCompare(b.original_name);
+        case "pages":
+          return dir * (a.page_count - b.page_count);
         case "size":
-          return b.file_size - a.file_size;
+          return dir * (a.file_size - b.file_size);
+        case "date":
+          return (
+            dir *
+            (new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime())
+          );
         default:
           return 0;
       }
     });
 
     return docs;
-  }, [currentDocuments, searchTerm, statusFilter, tagFilter, sortBy]);
+  }, [currentDocuments, searchTerm, statusFilter, tagFilter, sortKey, sortDir]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredDocuments.length / pageSize));
+  const safePageIndex = Math.min(pageIndex, pageCount - 1);
+  const paginatedDocuments = useMemo(
+    () =>
+      filteredDocuments.slice(
+        safePageIndex * pageSize,
+        (safePageIndex + 1) * pageSize,
+      ),
+    [filteredDocuments, safePageIndex, pageSize],
+  );
 
   const stats = useMemo(() => {
     const docs = currentDocuments;
@@ -309,6 +347,158 @@ export default function DocumentsPage() {
     );
   };
 
+  // ── Selection helpers ──────────────────────────────────────────────────────
+
+  const toggleSelect = useCallback((id: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(
+    (checked: boolean) => {
+      if (checked) {
+        setSelectedIds(new Set(paginatedDocuments.map((d) => d.id)));
+      } else {
+        setSelectedIds(new Set());
+      }
+    },
+    [paginatedDocuments],
+  );
+
+  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
+
+  // Are all items on this page selected?
+  const allPageSelected =
+    paginatedDocuments.length > 0 &&
+    paginatedDocuments.every((d) => selectedIds.has(d.id));
+  const somePageSelected =
+    !allPageSelected && paginatedDocuments.some((d) => selectedIds.has(d.id));
+
+  const selectedDocuments = useMemo(
+    () => filteredDocuments.filter((d) => selectedIds.has(d.id)),
+    [filteredDocuments, selectedIds],
+  );
+
+  // ── Bulk actions ─────────────────────────────────────────────────────────
+
+  const handleBulkDownload = useCallback(async () => {
+    if (isBulkProcessing) return;
+    setIsBulkProcessing(true);
+    const toastId = toast.loading(`Downloading ${selectedDocuments.length} documents...`);
+    let count = 0;
+    for (const doc of selectedDocuments) {
+      try {
+        await downloadDocument(doc);
+        count++;
+      } catch {
+        console.error(`Failed to download ${doc.original_name}`);
+      }
+    }
+    toast.dismiss(toastId);
+    toast.success(`Downloaded ${count} document${count !== 1 ? "s" : ""}`);
+    setIsBulkProcessing(false);
+  }, [selectedDocuments, isBulkProcessing]);
+
+  const handleBulkDelete = useCallback(async () => {
+    if (isBulkProcessing) return;
+    setIsBulkProcessing(true);
+    const toastId = toast.loading(`Deleting ${selectedDocuments.length} documents...`);
+    const deletedIds: string[] = [];
+    for (const doc of selectedDocuments) {
+      try {
+        await deleteDocument(doc.id);
+        deletedIds.push(doc.id);
+      } catch {
+        console.error(`Failed to delete ${doc.original_name}`);
+      }
+    }
+    toast.dismiss(toastId);
+    toast.success(`Deleted ${deletedIds.length} document${deletedIds.length !== 1 ? "s" : ""}`);
+    setDocuments((prev) => prev.filter((d) => !deletedIds.includes(d.id)));
+    setSelectedIds(new Set());
+    if (selectedDocumentId && deletedIds.includes(selectedDocumentId)) {
+      setSelectedDocumentId(null);
+      setSelectedFileUrl(null);
+    }
+    setIsBulkProcessing(false);
+  }, [selectedDocuments, isBulkProcessing, selectedDocumentId]);
+
+  const handleBulkToggleGlobal = useCallback(
+    async (makeGlobal: boolean) => {
+      if (isBulkProcessing) return;
+      setIsBulkProcessing(true);
+      const label = makeGlobal ? "Setting as global" : "Removing from global";
+      const toastId = toast.loading(`${label}...`);
+      let count = 0;
+      for (const doc of selectedDocuments) {
+        try {
+          await toggleDocumentGlobal(doc.id, makeGlobal);
+          count++;
+        } catch {
+          console.error(`Failed to toggle global for ${doc.original_name}`);
+        }
+      }
+      toast.dismiss(toastId);
+      toast.success(
+        makeGlobal
+          ? `Moved ${count} document${count !== 1 ? "s" : ""} to global`
+          : `Removed ${count} document${count !== 1 ? "s" : ""} from global`,
+      );
+      setDocuments((prev) =>
+        prev.map((d) =>
+          selectedIds.has(d.id) ? { ...d, is_global: makeGlobal } : d,
+        ),
+      );
+      setSelectedIds(new Set());
+      setIsBulkProcessing(false);
+    },
+    [selectedDocuments, selectedIds, isBulkProcessing],
+  );
+
+  // Wrappers that also reset pagination
+  const updateSearch = useCallback((value: string) => {
+    setSearchTerm(value);
+    setPageIndex(0);
+  }, []);
+
+  const updateStatusFilter = useCallback((value: string) => {
+    setStatusFilter(value);
+    setPageIndex(0);
+  }, []);
+
+  const updateTagFilter = useCallback((value: string) => {
+    setTagFilter(value);
+    setPageIndex(0);
+  }, []);
+
+  // Toggle sort: if same key, flip direction; if new key, default to desc (except name → asc)
+  const handleSort = useCallback(
+    (key: "name" | "pages" | "size" | "date") => {
+      if (sortKey === key) {
+        setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+      } else {
+        setSortKey(key);
+        setSortDir(key === "name" ? "asc" : "desc");
+      }
+      setPageIndex(0);
+    },
+    [sortKey],
+  );
+
+  const sortIcon = (key: "name" | "pages" | "size" | "date") => {
+    if (sortKey !== key)
+      return <IconArrowsSort className="h-3.5 w-3.5 text-muted-foreground/50" />;
+    return sortDir === "asc" ? (
+      <IconArrowUp className="h-3.5 w-3.5" />
+    ) : (
+      <IconArrowDown className="h-3.5 w-3.5" />
+    );
+  };
+
   if (isInitialLoad) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -383,6 +573,8 @@ export default function DocumentsPage() {
                   setStatusFilter("all");
                   setTagFilter("all");
                   setSearchTerm("");
+                  setPageIndex(0);
+                  setSelectedIds(new Set());
                 }}
               >
                 <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -416,7 +608,7 @@ export default function DocumentsPage() {
                   label="Total Documents"
                   value={stats.total}
                   subtext={formatFileSize(stats.totalSize)}
-                  onClick={() => setStatusFilter("all")}
+                  onClick={() => updateStatusFilter("all")}
                   isActive={statusFilter === "all"}
                 />
                 <StatCard
@@ -424,21 +616,21 @@ export default function DocumentsPage() {
                   label="Ready"
                   value={stats.ready}
                   subtext={`${stats.totalPages} total pages`}
-                  onClick={() => setStatusFilter("completed")}
+                  onClick={() => updateStatusFilter("completed")}
                   isActive={statusFilter === "completed"}
                 />
                 <StatCard
                   icon={IconClock}
                   label="Processing"
                   value={stats.processing}
-                  onClick={() => setStatusFilter("processing")}
+                  onClick={() => updateStatusFilter("processing")}
                   isActive={statusFilter === "processing"}
                 />
                 <StatCard
                   icon={IconAlertTriangle}
                   label="Failed"
                   value={stats.error}
-                  onClick={() => setStatusFilter("failed")}
+                  onClick={() => updateStatusFilter("failed")}
                   isActive={statusFilter === "failed"}
                 />
               </div>
@@ -450,7 +642,7 @@ export default function DocumentsPage() {
                     <Input
                       placeholder="Search documents or tags..."
                       value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onChange={(e) => updateSearch(e.target.value)}
                       className="pl-9"
                     />
                   </div>
@@ -458,7 +650,7 @@ export default function DocumentsPage() {
                   <div className="flex items-center gap-2">
                     <Select
                       value={statusFilter}
-                      onValueChange={setStatusFilter}
+                      onValueChange={updateStatusFilter}
                     >
                       <SelectTrigger className="w-35">
                         <IconFilter className="h-4 w-4" />
@@ -473,7 +665,7 @@ export default function DocumentsPage() {
                       </SelectContent>
                     </Select>
 
-                    <Select value={tagFilter} onValueChange={setTagFilter}>
+                    <Select value={tagFilter} onValueChange={updateTagFilter}>
                       <SelectTrigger className="w-35">
                         <IconTag className="h-4 w-4" />
                         <SelectValue placeholder="Tag" />
@@ -493,23 +685,10 @@ export default function DocumentsPage() {
                         ))}
                       </SelectContent>
                     </Select>
-
-                    <Select value={sortBy} onValueChange={setSortBy}>
-                      <SelectTrigger className="w-35">
-                        <IconSortDescending className="h-4 w-4" />
-                        <SelectValue placeholder="Sort by"></SelectValue>
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                        <SelectItem value="newest">Newest first</SelectItem>
-                        <SelectItem value="oldest">Oldest first</SelectItem>
-                        <SelectItem value="name">Name</SelectItem>
-                        <SelectItem value="size">File size</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
 
-                {/* Documents List */}
+                {/* Documents Table */}
                 <div className="space-y-3">
                   {filteredDocuments.length === 0 ? (
                     searchTerm || statusFilter !== "all" || tagFilter !== "all" ? (
@@ -528,6 +707,7 @@ export default function DocumentsPage() {
                             setSearchTerm("");
                             setStatusFilter("all");
                             setTagFilter("all");
+                            setPageIndex(0);
                           }}
                         >
                           Clear filters
@@ -540,18 +720,89 @@ export default function DocumentsPage() {
                       />
                     )
                   ) : (
-                    filteredDocuments.map((doc) => (
-                      <DocumentRow
-                        key={doc.id}
-                        document={doc}
-                        allTags={userTags}
-                        onClick={() => handleDocumentSelect(doc)}
-                        onDeleted={handleDocumentDeleted}
-                        onUpdated={handleDocumentUpdated}
-                        onTagCreated={handleTagCreated}
-                        onTagDeleted={handleTagDeleted}
+                    <>
+                      <div className="overflow-hidden rounded-lg border">
+                        <Table>
+                          <TableHeader className="bg-muted/50">
+                            <TableRow>
+                              <TableHead className="w-10 pr-0">
+                                <Checkbox
+                                  checked={allPageSelected || (somePageSelected && "indeterminate")}
+                                  onCheckedChange={(v) => toggleSelectAll(!!v)}
+                                  aria-label="Select all"
+                                />
+                              </TableHead>
+                              <TableHead
+                                className="min-w-50 cursor-pointer select-none hover:text-foreground transition-colors"
+                                onClick={() => handleSort("name")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Name
+                                  {sortIcon("name")}
+                                </div>
+                              </TableHead>
+                              <TableHead className="w-25">Status</TableHead>
+                              <TableHead className="w-50">Tags</TableHead>
+                              <TableHead
+                                className="w-17.5 cursor-pointer select-none hover:text-foreground transition-colors"
+                                onClick={() => handleSort("pages")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Pages
+                                  {sortIcon("pages")}
+                                </div>
+                              </TableHead>
+                              <TableHead
+                                className="w-20 cursor-pointer select-none hover:text-foreground transition-colors"
+                                onClick={() => handleSort("size")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Size
+                                  {sortIcon("size")}
+                                </div>
+                              </TableHead>
+                              <TableHead
+                                className="w-30 cursor-pointer select-none hover:text-foreground transition-colors"
+                                onClick={() => handleSort("date")}
+                              >
+                                <div className="flex items-center gap-1.5">
+                                  Uploaded
+                                  {sortIcon("date")}
+                                </div>
+                              </TableHead>
+                              <TableHead className="w-10" />
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {paginatedDocuments.map((doc) => (
+                              <DocumentTableRow
+                                key={doc.id}
+                                document={doc}
+                                allTags={userTags}
+                                selected={selectedIds.has(doc.id)}
+                                onSelectChange={(c) => toggleSelect(doc.id, c)}
+                                onClick={() => handleDocumentSelect(doc)}
+                                onDeleted={handleDocumentDeleted}
+                                onUpdated={handleDocumentUpdated}
+                                onTagCreated={handleTagCreated}
+                                onTagDeleted={handleTagDeleted}
+                              />
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                      <PaginationControls
+                        pageIndex={safePageIndex}
+                        pageCount={pageCount}
+                        pageSize={pageSize}
+                        totalItems={filteredDocuments.length}
+                        onPageChange={setPageIndex}
+                        onPageSizeChange={(size) => {
+                          setPageSize(size);
+                          setPageIndex(0);
+                        }}
                       />
-                    ))
+                    </>
                   )}
                 </div>
               </div>
@@ -567,6 +818,55 @@ export default function DocumentsPage() {
         existingFileNames={documents.map((d) => d.original_name)}
         onUploadComplete={addUploadedDocuments}
       />
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        onClearSelection={clearSelection}
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1.5"
+          disabled={isBulkProcessing}
+          onClick={handleBulkDownload}
+        >
+          <IconDownload className="h-3.5 w-3.5" />
+          Download
+        </Button>
+        {activeTab === "library" ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 gap-1.5"
+            disabled={isBulkProcessing}
+            onClick={() => handleBulkToggleGlobal(true)}
+          >
+            <IconWorld className="h-3.5 w-3.5" />
+            Set as global
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 gap-1.5"
+            disabled={isBulkProcessing}
+            onClick={() => handleBulkToggleGlobal(false)}
+          >
+            <IconWorldOff className="h-3.5 w-3.5" />
+            Remove from global
+          </Button>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1.5 text-destructive hover:text-destructive"
+          disabled={isBulkProcessing}
+          onClick={handleBulkDelete}
+        >
+          <IconTrash className="h-3.5 w-3.5" />
+          Delete
+        </Button>
+      </BulkActionBar>
     </div>
   );
 }

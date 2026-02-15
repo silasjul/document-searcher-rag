@@ -8,6 +8,7 @@ import {
   IconUpload,
   IconLibrary,
   IconSearch,
+  IconWorld,
 } from "@tabler/icons-react";
 import {
   Dialog,
@@ -204,9 +205,15 @@ export function CreateProjectDialog({
   const canProceed =
     step === "info" ? projectName.trim() && description.trim() : true; // Can create project without documents
 
-  // Get available documents (only ready/uploaded ones, and exclude already added documents in add mode)
+  // Count global documents (ready ones)
+  const globalDocumentCount = allDocuments.filter(
+    (doc) => doc.is_global && (doc.status === "completed" || doc.status === "uploaded")
+  ).length;
+
+  // Get available documents (only ready/uploaded ones, exclude global docs and already added docs in add mode)
   const availableDocuments = allDocuments.filter((doc) => {
     if (doc.status !== "completed" && doc.status !== "uploaded") return false;
+    if (doc.is_global) return false; // Global docs are auto-included in every project
     if (isAddDocumentsMode && existingDocumentIds.includes(doc.id))
       return false;
     return true;
@@ -261,6 +268,7 @@ export function CreateProjectDialog({
               documentTab={documentTab}
               setDocumentTab={setDocumentTab}
               totalDocumentCount={allDocuments.length}
+              globalDocumentCount={globalDocumentCount}
             />
           )}
         </div>
@@ -370,6 +378,7 @@ interface StepDocumentsProps {
   documentTab: "upload" | "library";
   setDocumentTab: (tab: "upload" | "library") => void;
   totalDocumentCount: number;
+  globalDocumentCount: number;
 }
 
 function StepDocuments({
@@ -463,19 +472,19 @@ function StepDocuments({
 
         {/* Fixed height container for consistent tab content */}
         <div className="h-80 mt-4">
-          <TabsContent value="upload" className="mt-0 h-full">
-            <div className="flex flex-col h-full">
-              <FileUploadZone
-                onFilesSelected={setUploadedFiles}
-                selectedFiles={uploadedFiles}
-                onRemoveFile={handleRemoveFile}
-                existingFileNames={existingDocumentNames}
-                maxFiles={10}
-              />
-              <p className="mt-3 text-xs text-muted-foreground text-center">
-                Uploaded files will be automatically added to your personal library.
-              </p>
-            </div>
+          <TabsContent value="upload" className="mt-0 h-full flex flex-col">
+            <FileUploadZone
+              onFilesSelected={setUploadedFiles}
+              selectedFiles={uploadedFiles}
+              onRemoveFile={handleRemoveFile}
+              existingFileNames={existingDocumentNames}
+              maxFiles={10}
+              compact={false}
+              className="flex-1 min-h-0"
+            />
+            <p className="mt-2 text-xs text-muted-foreground text-center shrink-0">
+              Uploaded files will be automatically added to your personal library.
+            </p>
           </TabsContent>
 
           <TabsContent value="library" className="mt-0 h-full">

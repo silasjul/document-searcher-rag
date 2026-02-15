@@ -24,7 +24,7 @@ export function DocumentStatusBadge({
         <Badge
           variant="secondary"
           className={cn(
-            "gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20",
+            "gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
             className
           )}
         >
@@ -38,7 +38,7 @@ export function DocumentStatusBadge({
         <Badge
           variant="secondary"
           className={cn(
-            "gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20",
+            "gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400",
             className
           )}
         >
@@ -52,7 +52,7 @@ export function DocumentStatusBadge({
         <Badge
           variant="secondary"
           className={cn(
-            "gap-1.5 bg-violet-500/10 text-violet-600 dark:text-violet-400 hover:bg-violet-500/20",
+            "gap-1.5 bg-violet-500/10 text-violet-600 dark:text-violet-400",
             className
           )}
         >
@@ -66,7 +66,7 @@ export function DocumentStatusBadge({
         <Badge
           variant="secondary"
           className={cn(
-            "gap-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20",
+            "gap-1.5 bg-blue-500/10 text-blue-600 dark:text-blue-400",
             className
           )}
         >
@@ -80,7 +80,7 @@ export function DocumentStatusBadge({
         <Badge
           variant="secondary"
           className={cn(
-            "gap-1.5 bg-slate-500/10 text-slate-600 dark:text-slate-400 hover:bg-slate-500/20",
+            "gap-1.5 bg-slate-500/10 text-slate-600 dark:text-slate-400",
             className
           )}
         >
@@ -94,7 +94,7 @@ export function DocumentStatusBadge({
         <Badge
           variant="secondary"
           className={cn(
-            "gap-1.5 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20",
+            "gap-1.5 bg-red-500/10 text-red-600 dark:text-red-400",
             className
           )}
         >

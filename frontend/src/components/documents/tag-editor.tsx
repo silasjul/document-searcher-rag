@@ -13,12 +13,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import type { Tag } from "@/lib/types";
 import {
   TAG_COLOR_OPTIONS,
@@ -222,27 +216,15 @@ export function TagEditorDialog({
                 onCheckedChange={(checked) => handleToggle(tag.id, checked)}
               />
 
-              {/* Delete button with confirmation dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
-                  >
-                    <IconTrash className="h-3.5 w-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
-                    onClick={() => handleDeleteTag(tag)}
-                  >
-                    <IconTrash className="size-4 text-destructive" />
-                    Delete &quot;{tag.name}&quot;
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Delete button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                onClick={() => handleDeleteTag(tag)}
+              >
+                <IconTrash className="h-3.5 w-3.5" />
+              </Button>
             </div>
           ))}
         </div>

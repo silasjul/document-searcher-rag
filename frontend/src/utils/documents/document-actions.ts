@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
-import { apiGet, apiDelete } from "@/lib/api-client";
+import { apiGet, apiDelete, apiPostBlob } from "@/lib/api-client";
 import type { Document, Tag } from "@/lib/types";
 
 // ── Document actions ────────────────────────────────────────────────────────
@@ -19,6 +19,30 @@ export async function downloadDocument(document: Document): Promise<void> {
   const a = window.document.createElement("a");
   a.href = url;
   a.download = document.original_name;
+  window.document.body.appendChild(a);
+  a.click();
+
+  // Cleanup
+  window.document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Download multiple documents as a single ZIP file.
+ * Sends the file IDs to the backend, which bundles them into a ZIP archive.
+ */
+export async function bulkDownloadDocuments(
+  documents: Document[],
+): Promise<void> {
+  const fileIds = documents.map((d) => d.id);
+  const blob = await apiPostBlob("/files/bulk-download", {
+    file_ids: fileIds,
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = window.document.createElement("a");
+  a.href = url;
+  a.download = "documents.zip";
   window.document.body.appendChild(a);
   a.click();
 

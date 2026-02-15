@@ -48,6 +48,7 @@ import { PaginationControls } from "@/components/documents/pagination-controls";
 import { BulkActionBar } from "@/components/documents/bulk-action-bar";
 import {
   downloadDocument,
+  bulkDownloadDocuments,
   removeDocumentFromProject,
 } from "@/utils/documents/document-actions";
 import { toast } from "sonner";
@@ -281,18 +282,25 @@ export function ProjectOverview({
   const handleBulkDownload = useCallback(async () => {
     if (isBulkProcessing) return;
     setIsBulkProcessing(true);
-    const toastId = toast.loading(`Downloading ${selectedDocuments.length} documents...`);
-    let count = 0;
-    for (const doc of selectedDocuments) {
-      try {
-        await downloadDocument(doc);
-        count++;
-      } catch {
-        console.error(`Failed to download ${doc.original_name}`);
+    const toastId = toast.loading(
+      `Preparing ${selectedDocuments.length} documents for download...`,
+    );
+    try {
+      if (selectedDocuments.length === 1) {
+        // Single document — download directly (no zip needed)
+        await downloadDocument(selectedDocuments[0]);
+      } else {
+        // Multiple documents — download as ZIP
+        await bulkDownloadDocuments(selectedDocuments);
       }
+      toast.dismiss(toastId);
+      toast.success(
+        `Downloaded ${selectedDocuments.length} document${selectedDocuments.length !== 1 ? "s" : ""}`,
+      );
+    } catch {
+      toast.dismiss(toastId);
+      toast.error("Failed to download documents");
     }
-    toast.dismiss(toastId);
-    toast.success(`Downloaded ${count} document${count !== 1 ? "s" : ""}`);
     setIsBulkProcessing(false);
   }, [selectedDocuments, isBulkProcessing]);
 
